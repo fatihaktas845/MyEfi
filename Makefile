@@ -20,4 +20,4 @@ clean:
 	@rm -f *.o bootx64.efi
 
 qemu:
-	qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -drive format=raw,file=fat:rw:drive/ -net none
+	qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -drive format=raw,file=fat:rw:drive/ -net none -nographic
