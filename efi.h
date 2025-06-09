@@ -22,7 +22,8 @@ typedef uint8_t        CHAR8;
 typedef uint16_t       CHAR16;
 typedef void           VOID;
 typedef uint64_t       EFI_STATUS;
-typedef void          *EFI_HANDLE;
+typedef void           *EFI_HANDLE;
+typedef void           *EFI_EVENT;
 
 typedef struct {
 	UINT32 TimeLow;
@@ -33,22 +34,73 @@ typedef struct {
 	UINT8  Node[6];
 } __attribute__((packed)) EFI_GUID;
 
+
+
+typedef struct _EFI_SIMPLE_TEXT_INPUT_PROTOCOL EFI_SIMPLE_TEXT_INPUT_PROTOCOL;
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_INPUT_RESET) (
+	IN EFI_SIMPLE_TEXT_INPUT_PROTOCOL     *This,
+	IN BOOLEAN                            ExtendedVerification
+);
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_INPUT_READ_KEY) (
+	IN EFI_SIMPLE_TEXT_INPUT_PROTOCOL     *This,
+	OUT EFI_INPUT_KEY                     *Key
+);
+
+typedef struct {
+	UINT16    ScanCode;
+	CHAR16    UnicodeChar;
+} EFI_INPUT_KEY;
+
+typedef struct _EFI_SIMPLE_TEXT_INPUT_PROTOCOL {
+	EFI_INPUT_RESET           Reset;
+	EFI_INPUT_READ_KEY        ReadKeyStroke;
+	EFI_EVENT                 WaitForKey;
+} EFI_SIMPLE_TEXT_INPUT_PROTOCOL;
+
+
 typedef struct _EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL;
 
 typedef
 EFI_STATUS
 (EFIAPI *EFI_TEXT_STRING)(
 	IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
-	IN CHAR16                                  *String
+	IN CHAR16                          *String
 );
 
 typedef struct _EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL {
-	void           *a;
+	void            *a;
 	EFI_TEXT_STRING OutputString;
 } EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL;
 
+
+
 typedef struct {
-	char                             a[52];
-	EFI_HANDLE                       ConsoleOutHandle;
+	UINT64 Signature;
+	UINT32 Revision;
+	UINT32 HeaderSize;
+	UINT32 CRC32;
+	UINT32 Reserved;
+} EFI_TABLE_HEADER;
+
+typedef struct {
+	EFI_TABLE_HEADER                Hdr;
+	CHAR16                          *FirmwareVendor;
+	UINT32                          FirmwareRevision;
+	EFI_HANDLE                      ConsoleInHandle;
+	EFI_SIMPLE_TEXT_INPUT_PROTOCOL  *ConIn;
+	EFI_HANDLE                      ConsoleOutHandle;
 	EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *ConOut;
 } EFI_SYSTEM_TABLE;
+
+typedefi
+EFI_STATUS
+(EFIAPI *EFI_IMAGE_ENTRY_POINT) (
+	IN EFI_HANDLE                   ImageHandle,
+	IN EFI_SYSTEM_TABLE             *SystemTable
+);
