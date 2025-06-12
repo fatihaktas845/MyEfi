@@ -2,10 +2,7 @@
 
 EFI_STATUS
 EFIAPI
-EfiMain (
-    IN EFI_HANDLE        ImageHandle,
-    IN EFI_SYSTEM_TABLE  *SystemTable
-    )
+efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE  *SystemTable)
 {
     SystemTable->ConOut->OutputString(SystemTable->ConOut, L"Hello World!\n");
     while(1);
