@@ -4,9 +4,13 @@
 
 #define IN
 #define OUT
+#define OPTIONAL
 #define CONST const
 #define EFIAPI __attribute__((ms_abi))
 
+//
+// Variables
+//
 typedef uint8_t        BOOLEAN;
 typedef int64_t        INTN;
 typedef uint64_t       UINTN;
@@ -34,7 +38,10 @@ typedef struct {
 	UINT8  Node[6];
 } __attribute__((packed)) EFI_GUID;
 
-
+//
+// Status Codes
+//
+#define EFI_SUCCESS 0
 
 typedef struct _EFI_SIMPLE_TEXT_INPUT_PROTOCOL EFI_SIMPLE_TEXT_INPUT_PROTOCOL;
 
@@ -96,6 +103,8 @@ typedef struct {
 	EFI_SIMPLE_TEXT_INPUT_PROTOCOL  *ConIn;
 	EFI_HANDLE                      ConsoleOutHandle;
 	EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *ConOut;
+	EFI_HANDLE                      StandartErrorHandle;
+	EFI_SIMPLE_TEXT_OUTPUT_HANDLE   *StdErr;
 } EFI_SYSTEM_TABLE;
 
 typedef
