@@ -104,7 +104,7 @@ typedef struct {
 	EFI_HANDLE                      ConsoleOutHandle;
 	EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *ConOut;
 	EFI_HANDLE                      StandartErrorHandle;
-	EFI_SIMPLE_TEXT_OUTPUT_HANDLE   *StdErr;
+	EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *StdErr;
 } EFI_SYSTEM_TABLE;
 
 typedef

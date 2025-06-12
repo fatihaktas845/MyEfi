@@ -1,6 +1,6 @@
 CC = x86_64-w64-mingw32-gcc
 CFLAGS  = -ffreestanding # -I ../gnu-efi/inc
-LDFLAGS = -nostdlib -mno-red-zone -Wl,-dll -Wl,--subsystem,10 -shared -e EfiMain
+LDFLAGS = -nostdlib -mno-red-zone -Wl,-dll -Wl,--subsystem,10 -shared -e efi_main
 
 SRC_FILES := $(wildcard *.c)
 OBJ_FILES := $(SRC_FILES:.c=.o)
