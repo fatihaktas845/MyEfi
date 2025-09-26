@@ -14,7 +14,7 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	EFI_LOADED_IMAGE_PROTOCOL *lip = NULL;
 	EFI_GUID lip_guid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
 
-	status = bs->OpenProtocol(
+	bs->OpenProtocol(
 			ImageHandle,
 			&lip_guid,
 			(VOID **)&lip,
@@ -22,22 +22,16 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 			NULL,
 			EFI_OPEN_PROTOCOL_GET_PROTOCOL);
 
-	if (EFI_ERROR(status))
-		ST->ConOut->OutputString(ST->ConOut, L"lip\r\n");
-
 	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *sfsp = NULL;
 	EFI_GUID sfsp_guid = EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_GUID;
 
-	status = bs->OpenProtocol(
+	bs->OpenProtocol(
 			lip->DeviceHandle,
 			&sfsp_guid,
 			(VOID **)&sfsp,
 			ImageHandle,
 			NULL,
 			EFI_OPEN_PROTOCOL_GET_PROTOCOL);
-
-	if (EFI_ERROR(status))
-		ST->ConOut->OutputString(ST->ConOut, L"sfsp\r\n");
 
 	EFI_FILE_PROTOCOL *root = NULL;
 	EFI_FILE_PROTOCOL *kernelFile = NULL;
@@ -108,11 +102,20 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	if (EFI_ERROR(status))
 		ST->ConOut->OutputString(ST->ConOut, L"Read\r\n");
 
-	typedef void (*KERNEL_ENTRY)(void);
+	EFI_GRAPHICS_OUTPUT_PROTOCOL *gop = NULL;
+	EFI_GUID gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+
+	bs->LocateProtocol(&gop_guid, NULL, (VOID **)&gop);
+	
+	UINT32 pps = gop->Mode->Info->PixelsPerScanLine;
+	UINT64 fb = gop->Mode->FrameBufferBase;
+
+
+	typedef void (*KERNEL_ENTRY)(UINT32 *pps, UINT64 *fb);
 	KERNEL_ENTRY kernelEntry = (KERNEL_ENTRY)(UINTN)(kernelAddress + kheader.entry_offset - header_size);
 
 	ST->ConOut->OutputString(ST->ConOut, L"Jumping to kernel...\r\n");
-	kernelEntry();
+	kernelEntry(&pps, &fb);
 	ST->ConOut->OutputString(ST->ConOut, L"Returned to bootloader...\r\n");
 
 	return EFI_SUCCESS;
