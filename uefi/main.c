@@ -1,4 +1,5 @@
 #include <efi.h>
+#include <stdint.h>
 
 struct kernel_header {
 	UINT64 entry_offset;
@@ -73,26 +74,32 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	if (EFI_ERROR(status))
 		ST->ConOut->OutputString(ST->ConOut, L"GetInfo 2\r\n");
 
+	EFI_PHYSICAL_ADDRESS fileAddress = 0x200000;
+
 	EFI_PHYSICAL_ADDRESS kernelAddress = 0;
 	UINTN fileSize = fi->FileSize;
-	
+		
 	UINTN header_size = sizeof(struct kernel_header);
 	UINTN kernelSize = fileSize - header_size;
-	struct kernel_header kheader;
+	struct kernel_header *kheader;
+
+	bs->AllocatePages(
+			AllocateAddress,
+			EfiLoaderData,
+			EFI_SIZE_TO_PAGES(fileSize),
+			&fileAddress);
 
 	kernelFile->Read(
 			kernelFile,
 			&header_size,
-			(VOID *)&kheader);
+			(VOID *)&fileAddress);
 
-	status = bs->AllocatePages(
-			AllocateAnyPages,
-			EfiLoaderData,
-			EFI_SIZE_TO_PAGES(kernelSize),
-			&kernelAddress);
+	kheader = (struct kernel_header*)(uintptr_t)fileAddress;
 
 	if (EFI_ERROR(status))
 		ST->ConOut->OutputString(ST->ConOut, L"AllocatePages\r\n");
+
+	kernelAddress = fileAddress + header_size;
 
 	status = kernelFile->Read(
 			kernelFile,
@@ -112,7 +119,7 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 
 
 	typedef void (*KERNEL_ENTRY)(UINT32 *pps, UINT64 *fb);
-	KERNEL_ENTRY kernelEntry = (KERNEL_ENTRY)(UINTN)(kernelAddress + kheader.entry_offset - header_size);
+	KERNEL_ENTRY kernelEntry = (KERNEL_ENTRY)(UINTN)(fileAddress + kheader->entry_offset);
 
 	ST->ConOut->OutputString(ST->ConOut, L"Jumping to kernel...\r\n");
 	kernelEntry(&pps, &fb);
