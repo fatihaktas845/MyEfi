@@ -1,9 +1,7 @@
 #include <efi.h>
 #include <stdint.h>
 
-struct kernel_header {
-	UINT64 entry_offset;
-};
+UINT64 entry_offset;
 
 EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	EFI_BOOT_SERVICES *bs = ST->BootServices;
@@ -79,9 +77,8 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	EFI_PHYSICAL_ADDRESS kernelAddress = 0;
 	UINTN fileSize = fi->FileSize;
 		
-	UINTN header_size = sizeof(struct kernel_header);
+	UINTN header_size = sizeof(UINT64);
 	UINTN kernelSize = fileSize - header_size;
-	struct kernel_header *kheader;
 
 	bs->AllocatePages(
 			AllocateAddress,
@@ -94,7 +91,10 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 			&header_size,
 			(VOID *)&fileAddress);
 
-	kheader = (struct kernel_header*)(uintptr_t)fileAddress;
+	UINTN *entry = NULL;
+
+	entry = (UINT64*)(uintptr_t)fileAddress;
+	entry_offset = *entry;
 
 	if (EFI_ERROR(status))
 		ST->ConOut->OutputString(ST->ConOut, L"AllocatePages\r\n");
@@ -118,11 +118,11 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	UINT64 fb = gop->Mode->FrameBufferBase;
 
 
-	typedef void (*KERNEL_ENTRY)(UINT32 *pps, UINT64 *fb);
-	KERNEL_ENTRY kernelEntry = (KERNEL_ENTRY)(UINTN)(fileAddress + kheader->entry_offset);
+	typedef void (*KERNEL_ENTRY)();
+	KERNEL_ENTRY kernelEntry = (KERNEL_ENTRY)(UINTN)(fileAddress + entry_offset);
 
 	ST->ConOut->OutputString(ST->ConOut, L"Jumping to kernel...\r\n");
-	kernelEntry(&pps, &fb);
+	kernelEntry();
 	ST->ConOut->OutputString(ST->ConOut, L"Returned to bootloader...\r\n");
 
 	return EFI_SUCCESS;
