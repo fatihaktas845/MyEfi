@@ -118,11 +118,11 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	UINT64 fb = gop->Mode->FrameBufferBase;
 
 
-	typedef void (*KERNEL_ENTRY)();
+	typedef void (*KERNEL_ENTRY)(UINT32 *pps, UINT64 *fb);
 	KERNEL_ENTRY kernelEntry = (KERNEL_ENTRY)(UINTN)(fileAddress + entry_offset);
 
 	ST->ConOut->OutputString(ST->ConOut, L"Jumping to kernel...\r\n");
-	kernelEntry();
+	kernelEntry(&pps, &fb);
 	ST->ConOut->OutputString(ST->ConOut, L"Returned to bootloader...\r\n");
 
 	return EFI_SUCCESS;

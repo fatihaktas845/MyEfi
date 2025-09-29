@@ -10,6 +10,8 @@ global _start
 extern kmain
 
 _start:
+	mov rdi, rcx
+	mov rsi, rdx
 	call kmain
 
 .halt:
