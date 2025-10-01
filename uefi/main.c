@@ -1,7 +1,27 @@
 #include <efi.h>
-#include <stdint.h>
+#include "elf.h"
 
-UINT64 entry_offset;
+#define PT_LOAD 1
+
+void *memcpy(void *dest, void *src, uint64_t n) {
+	uint8_t *d = (uint8_t*)dest;
+	uint8_t *s = (uint8_t*)src;
+
+	for (uint32_t i = 0; i < n; i++)
+		d[i] = s[i];
+
+	return dest;
+}
+
+void *memset(void *dest, uint64_t value, uint64_t n) {
+	uint8_t *d = (uint8_t*)dest;
+	uint8_t v = (uint8_t)value;
+
+	for (uint32_t i = 0; i < n; i++)
+		d[i] = v;
+
+	return dest;
+}
 
 EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	EFI_BOOT_SERVICES *bs = ST->BootServices;
@@ -42,88 +62,55 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	status = root->Open(
 			root,
 			&kernelFile,
-			L"\\EFI\\BOOT\\kernel.bin",
+			L"\\EFI\\BOOT\\kernel.elf",
 			EFI_FILE_MODE_READ,
 			0);
 
 	if (EFI_ERROR(status))
 		ST->ConOut->OutputString(ST->ConOut, L"Open\r\n");
 
-	EFI_FILE_INFO *fi = NULL;
-	EFI_GUID fi_guid = EFI_FILE_INFO_ID;
-	UINTN bufferSize = 0;
+	Elf64_Ehdr *ehdr = NULL;
+	UINTN ehdr_size = sizeof(Elf64_Ehdr);
+	bs->AllocatePool(EfiLoaderData, ehdr_size, (VOID **)&ehdr);
+	kernelFile->Read(kernelFile, &ehdr_size, (VOID *)ehdr);
 
-	status = kernelFile->GetInfo(kernelFile, &fi_guid, &bufferSize, NULL);
+	Elf64_Phdr *phdr_table = NULL;
+	UINTN phdr_table_size = ehdr->e_phnum * ehdr->e_phentsize;
+	bs->AllocatePool(EfiLoaderData, phdr_table_size, (VOID **)&phdr_table);
+	kernelFile->SetPosition(kernelFile, ehdr->e_phoff);
+	kernelFile->Read(kernelFile, &phdr_table_size, (VOID *)phdr_table);
 
-	if (status != EFI_BUFFER_TOO_SMALL)
-		ST->ConOut->OutputString(ST->ConOut, L"GetInfo 1\r\n");
+	for (uint32_t i = 0; i < ehdr->e_phnum; i++) {
+		UINTN memsize = phdr_table[i].p_memsz;
+		UINTN filesize = phdr_table[i].p_filesz;
+		EFI_PHYSICAL_ADDRESS vaddr = phdr_table[i].p_vaddr;
+		VOID *p_vaddr = (VOID *)(uintptr_t)vaddr;
+		bs->AllocatePages(
+				AllocateAddress,
+				EfiLoaderData,
+				EFI_SIZE_TO_PAGES(memsize),
+				&vaddr);
+		kernelFile->SetPosition(kernelFile, phdr_table[i].p_offset);
+		kernelFile->Read(kernelFile, &filesize, p_vaddr);
 
-	status = bs->AllocatePool(EfiBootServicesData, bufferSize, (VOID **)&fi);
-
-	if (EFI_ERROR(status))
-		ST->ConOut->OutputString(ST->ConOut, L"AllocatePool\r\n");
-
-	status = kernelFile->GetInfo(
-			kernelFile,
-			&fi_guid,
-			&bufferSize,
-			fi);
-
-	if (EFI_ERROR(status))
-		ST->ConOut->OutputString(ST->ConOut, L"GetInfo 2\r\n");
-
-	EFI_PHYSICAL_ADDRESS fileAddress = 0x200000;
-
-	EFI_PHYSICAL_ADDRESS kernelAddress = 0;
-	UINTN fileSize = fi->FileSize;
-		
-	UINTN header_size = sizeof(UINT64);
-	UINTN kernelSize = fileSize - header_size;
-
-	bs->AllocatePages(
-			AllocateAddress,
-			EfiLoaderData,
-			EFI_SIZE_TO_PAGES(fileSize),
-			&fileAddress);
-
-	kernelFile->Read(
-			kernelFile,
-			&header_size,
-			(VOID *)&fileAddress);
-
-	UINTN *entry = NULL;
-
-	entry = (UINT64*)(uintptr_t)fileAddress;
-	entry_offset = *entry;
-
-	if (EFI_ERROR(status))
-		ST->ConOut->OutputString(ST->ConOut, L"AllocatePages\r\n");
-
-	kernelAddress = fileAddress + header_size;
-
-	status = kernelFile->Read(
-			kernelFile,
-			&kernelSize,
-			(VOID *)kernelAddress);
-
-	if (EFI_ERROR(status))
-		ST->ConOut->OutputString(ST->ConOut, L"Read\r\n");
+		if (memsize > filesize) {
+			UINT8 *bss_start = (UINT8*)p_vaddr + filesize;
+			memset((VOID*)bss_start, 0, memsize - filesize);
+		}
+	}
 
 	EFI_GRAPHICS_OUTPUT_PROTOCOL *gop = NULL;
 	EFI_GUID gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
-
 	bs->LocateProtocol(&gop_guid, NULL, (VOID **)&gop);
-	
-	UINT32 pps = gop->Mode->Info->PixelsPerScanLine;
-	UINT64 fb = gop->Mode->FrameBufferBase;
 
+	uint32_t pps = gop->Mode->Info->PixelsPerScanLine;
+	uint64_t fb = gop->Mode->FrameBufferBase;
 
-	typedef void (*KERNEL_ENTRY)(UINT32 *pps, UINT64 *fb);
-	KERNEL_ENTRY kernelEntry = (KERNEL_ENTRY)(UINTN)(fileAddress + entry_offset);
+	VOID *entry = (VOID *)(uintptr_t)ehdr->e_entry;
+	typedef VOID (*KERNEL_ENTRY)(UINT32 *pps, UINT64 *fb);
+	KERNEL_ENTRY kernel_entry = (KERNEL_ENTRY)entry;
 
-	ST->ConOut->OutputString(ST->ConOut, L"Jumping to kernel...\r\n");
-	kernelEntry(&pps, &fb);
-	ST->ConOut->OutputString(ST->ConOut, L"Returned to bootloader...\r\n");
+	kernel_entry(&pps, &fb);
 
 	return EFI_SUCCESS;
 }
