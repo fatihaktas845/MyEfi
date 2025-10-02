@@ -23,6 +23,13 @@ void *memset(void *dest, uint64_t value, uint64_t n) {
 	return dest;
 }
 
+typedef struct {
+	UINT32 Width;
+	UINT32 Height;
+	UINT32 PixelsPerScanLine;
+	UINT64 FrameBufferBase;
+}KernelGOPInfo;
+
 EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	EFI_BOOT_SERVICES *bs = ST->BootServices;
 
@@ -99,18 +106,61 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 		}
 	}
 
+	kernelFile->Close(kernelFile);
+	root->Close(root);
+
+	bs->CloseProtocol(
+			lip->DeviceHandle,
+			&sfsp_guid,
+			ImageHandle,
+			NULL);
+
+	bs->CloseProtocol(
+			ImageHandle,
+			&lip_guid,
+			ImageHandle,
+			NULL);
+
 	EFI_GRAPHICS_OUTPUT_PROTOCOL *gop = NULL;
 	EFI_GUID gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
 	bs->LocateProtocol(&gop_guid, NULL, (VOID **)&gop);
 
-	uint32_t pps = gop->Mode->Info->PixelsPerScanLine;
-	uint64_t fb = gop->Mode->FrameBufferBase;
+	KernelGOPInfo kgi;
+	kgi.PixelsPerScanLine = gop->Mode->Info->PixelsPerScanLine;
+	kgi.FrameBufferBase = gop->Mode->FrameBufferBase;
+	kgi.Width = gop->Mode->Info->HorizontalResolution;
+	kgi.Height = gop->Mode->Info->VerticalResolution;
 
 	VOID *entry = (VOID *)(uintptr_t)ehdr->e_entry;
-	typedef VOID (*KERNEL_ENTRY)(UINT32 *pps, UINT64 *fb);
+	typedef VOID (*KERNEL_ENTRY)(KernelGOPInfo *kgi);
 	KERNEL_ENTRY kernel_entry = (KERNEL_ENTRY)entry;
 
-	kernel_entry(&pps, &fb);
+	UINTN MemMapSize;
+	UINTN MapKey;
+	UINTN DescriptorSize;
+	UINT32 DescriptorVersion;
+	EFI_MEMORY_DESCRIPTOR *MemMap = NULL;
+
+	bs->GetMemoryMap(
+			&MemMapSize,
+			MemMap,
+			&MapKey,
+			&DescriptorSize,
+			&DescriptorVersion);
+
+	MemMapSize += 5 * DescriptorSize;
+	bs->AllocatePool(EfiLoaderData, MemMapSize, (VOID **)&MemMap);
+
+	bs->GetMemoryMap(
+			&MemMapSize,
+			MemMap,
+			&MapKey,
+			&DescriptorSize,
+			&DescriptorVersion);
+
+	bs->ExitBootServices(ImageHandle, MapKey);
+
+	kernel_entry(&kgi);
 
 	return EFI_SUCCESS;
 }
