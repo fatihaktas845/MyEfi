@@ -17,6 +17,8 @@ ISO_TARGET	  := FatOS-x86_64.iso
 
 .PHONY: all clear
 
+$(shell mkdir -p esp/EFI/BOOT)
+
 all: $(ISO_TARGET)
 	qemu-system-x86_64 -bios boot/OVMF.fd \
 		-cdrom $(ISO_TARGET) \
@@ -43,7 +45,6 @@ $(BOOT_TARGET): $(BOOT_OBJ)
 		$^ -o $@
 
 boot/%.o: boot/%.c
-	mkdir -p esp/EFI/BOOT
 	$(CC) -target x86_64-unknown-windows \
 		-fshort-wchar \
 		-I ../gnu-efi/inc \
