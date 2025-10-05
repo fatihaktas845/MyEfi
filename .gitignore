@@ -1,4 +1,0 @@
-kernel/*.o
-kernel/*.bin
-uefi/*.efi
-uefi/*.o
