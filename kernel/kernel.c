@@ -10,7 +10,7 @@ typedef struct {
 uint32_t pps;
 volatile uint32_t *fbb;
 
-void __attribute__((ms_abi))  kmain(KernelGOPInfo *kgi) {
+void kmain(KernelGOPInfo *kgi) {
 	fbb = (uint32_t*)(uintptr_t)kgi->FrameBufferBase;
 	pps = kgi->PixelsPerScanLine;
 	
