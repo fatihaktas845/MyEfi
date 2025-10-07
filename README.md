@@ -12,7 +12,7 @@ sudo pacman -S clang qemu-system
 
 ## Compile and Run
 
-Just clone the repo and run tgis command in the root of project:
+Just clone the repo and run this command in the root of project:
 
 ```bash
 make
