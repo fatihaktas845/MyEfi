@@ -12,7 +12,7 @@ sudo pacman -S clang nasm qemu-system
 
 ## Compile and Run
 
-Just clone the repo and run this command in the root of project:
+Just clone the repo and run this command in the root of the repository:
 
 ```bash
 make
