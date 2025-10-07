@@ -3,6 +3,10 @@
 
 #define PT_LOAD 1
 
+#define PF_X	0x1
+#define PF_W	0x2
+#define PF_R	0x4
+
 void *memcpy(void *dest, void *src, uint64_t n) {
 	uint8_t *d = (uint8_t*)dest;
 	uint8_t *s = (uint8_t*)src;
@@ -92,9 +96,13 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 		UINTN filesize = phdr_table[i].p_filesz;
 		EFI_PHYSICAL_ADDRESS vaddr = phdr_table[i].p_vaddr;
 		VOID *p_vaddr = (VOID *)(uintptr_t)vaddr;
+
+		EFI_MEMORY_TYPE memType;
+		memType = (phdr_table[i].p_flags & PF_X) ? EfiLoaderCode : EfiLoaderData;
+
 		bs->AllocatePages(
 				AllocateAddress,
-				EfiLoaderData,
+				memType,
 				EFI_SIZE_TO_PAGES(memsize),
 				&vaddr);
 		kernelFile->SetPosition(kernelFile, phdr_table[i].p_offset);
