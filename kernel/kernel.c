@@ -10,6 +10,15 @@ typedef struct {
 uint32_t pps;
 volatile uint32_t *fbb;
 
+void kmain(KernelGOPInfo *kgi);
+
+void _start() {
+	__asm__ volatile (
+		"mov %%rcx, %%rdi\n\t"
+		"call kmain": : : "rdi"
+	);
+}
+
 void kmain(KernelGOPInfo *kgi) {
 	fbb = (uint32_t*)(uintptr_t)kgi->FrameBufferBase;
 	pps = kgi->PixelsPerScanLine;

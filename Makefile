@@ -1,15 +1,11 @@
 CC := clang -ffreestanding -fno-stack-protector -mno-red-zone
 LD := ld.lld -nostdlib -e _start -pie
-ASM := nasm -f elf64
 
 BOOT_SRC := $(wildcard boot/*.c)
 BOOT_OBJ := $(patsubst boot/%.c, boot/%.o, $(BOOT_SRC))
 
 KERNEL_SRC := $(wildcard kernel/*.c)
 KERNEL_OBJ := $(patsubst kernel/%.c, kernel/%.o, $(KERNEL_SRC))
-
-ASM_SRC := $(wildcard kernel/*.asm)
-ASM_OBJ := $(patsubst kernel/%.asm, kernel/%.o, $(ASM_SRC))
 
 BOOT_TARGET   := esp/EFI/BOOT/bootx64.efi
 KERNEL_TARGET := esp/EFI/BOOT/kernel.elf
@@ -23,7 +19,7 @@ all: $(ISO_TARGET)
 	qemu-system-x86_64 -bios boot/OVMF.fd \
 		-cdrom $(ISO_TARGET) \
 		-net none \
-		-machine q35
+		-machine q35 -vnc :0 -monitor stdio
 
 $(ISO_TARGET): $(BOOT_TARGET) $(KERNEL_TARGET)
 	dd if=/dev/zero of=esp/efi.img bs=1M count=1
@@ -50,16 +46,13 @@ boot/%.o: boot/%.c
 		-I ../gnu-efi/inc \
 		-c $< -o $@
 
-$(KERNEL_TARGET): $(KERNEL_OBJ) $(ASM_OBJ)
+$(KERNEL_TARGET): $(KERNEL_OBJ)
 	$(LD) $^ -o $@
 
 kernel/%.o: kernel/%.c
 	$(CC) -target x86_64-unknown-elf \
 		-fPIE \
 		-c $< -o $@
-
-kernel/%.o: kernel/%.asm
-	$(ASM) $< -o $@
 
 clear:
 	rm -rf esp \
