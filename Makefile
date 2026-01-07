@@ -1,5 +1,5 @@
 CC := clang -ffreestanding -fno-stack-protector -mno-red-zone
-LD := ld.lld -nostdlib -e _start -pie
+LD := ld.lld -nostdlib -no-pie
 
 BOOT_SRC := $(wildcard boot/*.c)
 BOOT_OBJ := $(patsubst boot/%.c, boot/%.o, $(BOOT_SRC))
@@ -47,11 +47,12 @@ boot/%.o: boot/%.c
 		-c $< -o $@
 
 $(KERNEL_TARGET): $(KERNEL_OBJ)
-	$(LD) $^ -o $@
+	$(LD) $^ -o $@ -T kernel/kernel.ld \
+		-z max-page-size=0x1000
 
 kernel/%.o: kernel/%.c
 	$(CC) -target x86_64-unknown-elf \
-		-fPIE \
+		-fno-pie \
 		-c $< -o $@
 
 clear:
