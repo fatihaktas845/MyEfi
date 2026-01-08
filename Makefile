@@ -19,7 +19,9 @@ all: $(ISO_TARGET)
 	qemu-system-x86_64 -bios boot/OVMF.fd \
 		-cdrom $(ISO_TARGET) \
 		-net none \
-		-machine q35 -vnc :0 -monitor stdio
+		-machine q35 \
+		-vnc :0 \
+		-monitor stdio
 
 $(ISO_TARGET): $(BOOT_TARGET) $(KERNEL_TARGET)
 	dd if=/dev/zero of=esp/efi.img bs=1M count=1
@@ -47,7 +49,8 @@ boot/%.o: boot/%.c
 		-c $< -o $@
 
 $(KERNEL_TARGET): $(KERNEL_OBJ)
-	$(LD) $^ -o $@ -T kernel/kernel.ld \
+	$(LD) $^ -o $@ \
+		-T kernel/kernel.ld \
 		-z max-page-size=0x1000
 
 kernel/%.o: kernel/%.c

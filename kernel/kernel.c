@@ -10,8 +10,6 @@ typedef struct {
 uint32_t pps;
 volatile uint32_t *fbb;
 
-void kmain(KernelGOPInfo *kgi);
-
 void _start() {
 	__asm__ volatile (
 		"mov %%rcx, %%rdi\n\t"
