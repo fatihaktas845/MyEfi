@@ -6,19 +6,19 @@ SECTIONS
 {
     . = 2M;
 
-    .text ALIGN(4K) : {
+    .text ALIGN(2M) : {
         *(.text*)
     }
 
-    .rodata ALIGN(4K) : {
+    .rodata ALIGN(2M) : {
         *(.rodata*)
     }
 
-    .data ALIGN(4K) : {
+    .data ALIGN(2M) : {
         *(.data*)
     }
 
-    .bss ALIGN(4K) : {
+    .bss ALIGN(2M) : {
         *(COMMON)
         *(.bss*)
     }
