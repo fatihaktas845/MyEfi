@@ -17,21 +17,23 @@ $(shell mkdir -p esp/EFI/BOOT)
 
 all: $(ISO_TARGET)
 	qemu-system-x86_64 -bios boot/OVMF.fd \
-		-cdrom $(ISO_TARGET) \
+		-drive if=virtio,format=raw,file=$(ISO_TARGET) \
 		-net none \
-		-machine q35 \
+		-m 512M \
 		-vnc :0 \
 		-monitor stdio
 
 $(ISO_TARGET): $(BOOT_TARGET) $(KERNEL_TARGET)
-	dd if=/dev/zero of=esp/efi.img bs=1M count=1
-	mformat -i esp/efi.img ::
+	dd if=/dev/zero of=esp/efi.img bs=1M count=64
+	mkfs.vfat -F 32 esp/efi.img
 	mmd -i esp/efi.img ::/EFI
 	mmd -i esp/efi.img ::/EFI/BOOT
 	mcopy -i esp/efi.img $(BOOT_TARGET) ::/EFI/BOOT
 	mcopy -i esp/efi.img $(KERNEL_TARGET) ::/EFI/BOOT
 	xorriso -as mkisofs \
 		-no-emul-boot \
+		-eltorito-alt-boot \
+		-isohybrid-gpt-basdat \
 		-e efi.img \
 		-o $(ISO_TARGET) esp/
 

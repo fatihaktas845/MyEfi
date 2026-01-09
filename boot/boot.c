@@ -27,37 +27,6 @@ void *memset(void *dest, uint64_t value, uint64_t n) {
 	return dest;
 }
 
-#define PAGE_PRESENT (1ULL << 0)
-#define PAGE_RW      (1ULL << 1)
-#define PAGE_PS      (1ULL << 7)
-
-uint64_t pml4[512] __attribute__((aligned(0x1000)));
-uint64_t pdpt[512] __attribute__((aligned(0x1000)));
-uint64_t pd[512] __attribute__((aligned(0x1000)));
-
-void setup_identity_map() {
-	for (uint32_t i = 0; i < 512; i++)
-		pd[i] = (i * 0x200000) | PAGE_PRESENT | PAGE_RW | PAGE_PS;
-
-	pdpt[0] = ((uint64_t)pd) | PAGE_PRESENT | PAGE_RW;
-	pml4[0] = ((uint64_t)pdpt) | PAGE_PRESENT | PAGE_RW;
-
-	uint64_t pml4_base = (uint64_t)pml4;
-	__asm__ volatile(
-		"mov %0, %%cr3": : "r"(pml4_base) :
-	);
-
-	uint64_t cr0;
-	__asm__ volatile(
-		"mov %%cr0, %0": "=r"(cr0) : :
-	);
-
-	cr0 |= (1ULL << 31);
-	__asm__ volatile(
-		"mov %0, %%cr0": : "r"(cr0) :
-	);
-}
-
 typedef struct {
 	UINT32 Width;
 	UINT32 Height;
@@ -69,8 +38,6 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	EFI_BOOT_SERVICES *bs = ST->BootServices;
 
 	ST->ConOut->ClearScreen(ST->ConOut);
-
-	// setup_identity_map();
 
 	EFI_STATUS status = EFI_SUCCESS;
 	EFI_LOADED_IMAGE_PROTOCOL *lip = NULL;
