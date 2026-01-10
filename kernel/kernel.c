@@ -13,23 +13,26 @@ volatile uint32_t *fbb;
 #define PAGE_PRESENT (1ULL << 0)
 #define PAGE_RW      (1ULL << 1)
 #define PAGE_PS      (1ULL << 7)
+#define PAGE_PCD     (1ULL << 4)
 
 uint64_t pml4[512] __attribute__((aligned(4096)));
 uint64_t pdpt[512] __attribute__((aligned(4096)));
-uint64_t pd[512] __attribute__((aligned(4096)));
-uint64_t pt[512][512] __attribute__((aligned(4096)));
+// uint64_t pd[512] __attribute__((aligned(4096)));
+// uint64_t pt[512][512] __attribute__((aligned(4096)));
 
 void setup_identity_map() {
-    for (int pd_i = 0; pd_i < 512; pd_i++) {
+    /* for (int pd_i = 0; pd_i < 512; pd_i++) {
         for (int pt_i = 0; pt_i < 512; pt_i++) {
             uint64_t addr = ((pd_i * 512) + pt_i) * 0x1000;
             pt[pd_i][pt_i] = addr | PAGE_PRESENT | PAGE_RW;
             pd[pd_i] = (uint64_t)&pt[pd_i][0] | PAGE_PRESENT | PAGE_RW;
         }
-    }
+    } */
 
+	for (int i = 0; i < 8; i++) {
+		pdpt[i] = ((uint64_t)i << 30) | PAGE_PRESENT | PAGE_RW | PAGE_PS | PAGE_PCD;
+	}
 
-    pdpt[0] = ((uint64_t)pd) | PAGE_PRESENT | PAGE_RW;
     pml4[0] = ((uint64_t)pdpt) | PAGE_PRESENT | PAGE_RW;
 
     uint64_t pml4_base = (uint64_t)pml4;
@@ -49,12 +52,12 @@ void setup_identity_map() {
 }
 
 void _start() {
+	setup_identity_map();
+
 	__asm__ volatile (
 		"mov %%rcx, %%rdi\n\t"
 		"call kmain": : : "rdi"
 	);
-
-	setup_identity_map();
 }
 
 void kmain(KernelGOPInfo *kgi) {
