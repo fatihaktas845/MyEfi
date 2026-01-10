@@ -20,7 +20,7 @@ uint64_t pdpt[512] __attribute__((aligned(4096)));
 // uint64_t pd[512] __attribute__((aligned(4096)));
 // uint64_t pt[512][512] __attribute__((aligned(4096)));
 
-void setup_identity_map() {
+void setup_identity_map(KernelGOPInfo *kgi) {
     /* for (int pd_i = 0; pd_i < 512; pd_i++) {
         for (int pt_i = 0; pt_i < 512; pt_i++) {
             uint64_t addr = ((pd_i * 512) + pt_i) * 0x1000;
@@ -29,9 +29,15 @@ void setup_identity_map() {
         }
     } */
 
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < 512; i++) {
 		pdpt[i] = ((uint64_t)i << 30) | PAGE_PRESENT | PAGE_RW | PAGE_PS | PAGE_PCD;
 	}
+
+	uint64_t fb_phys = kgi->FrameBufferBase;
+	uint64_t fb_aligned = fb_phys & ~((1ULL << 30) - 1);
+
+	uint64_t fb_idx = fb_aligned >> 30; // bits 38..30
+	pdpt[fb_idx] = fb_aligned | PAGE_PRESENT | PAGE_RW | PAGE_PS | PAGE_PCD;
 
     pml4[0] = ((uint64_t)pdpt) | PAGE_PRESENT | PAGE_RW;
 
@@ -52,8 +58,6 @@ void setup_identity_map() {
 }
 
 void _start() {
-	setup_identity_map();
-
 	__asm__ volatile (
 		"mov %%rcx, %%rdi\n\t"
 		"call kmain": : : "rdi"
@@ -61,6 +65,8 @@ void _start() {
 }
 
 void kmain(KernelGOPInfo *kgi) {
+	setup_identity_map(kgi);
+
 	fbb = (uint32_t*)(uintptr_t)kgi->FrameBufferBase;
 	pps = kgi->PixelsPerScanLine;
 	
