@@ -13,7 +13,6 @@ volatile uint32_t *fbb;
 #define PAGE_PRESENT (1ULL << 0)
 #define PAGE_RW      (1ULL << 1)
 #define PAGE_PS      (1ULL << 7)
-#define PAGE_PCD     (1ULL << 4)
 
 uint64_t pml4[512] __attribute__((aligned(4096)));
 uint64_t pdpt[512] __attribute__((aligned(4096)));
@@ -30,7 +29,7 @@ void setup_identity_map(KernelGOPInfo *kgi) {
     } */
 
 	for (int i = 0; i < 512; i++) {
-		pdpt[i] = ((uint64_t)i << 30) | PAGE_PRESENT | PAGE_RW | PAGE_PS | PAGE_PCD;
+		pdpt[i] = ((uint64_t)i << 30) | PAGE_PRESENT | PAGE_RW | PAGE_PS;
 	}
 
 	uint64_t fb_phys = kgi->FrameBufferBase;

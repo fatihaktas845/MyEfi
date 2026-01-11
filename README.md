@@ -7,7 +7,7 @@ This project contains a simple UEFI bootloader and kernel written from scratch. 
 First you need to install some dependencies. For example in Arch Linux:
 
 ```bash
-sudo pacman -S clang nasm qemu-system
+sudo pacman -S clang qemu-system mtools xorriso
 ```
 
 ## Compile and Run
