@@ -45,6 +45,7 @@ sync
 ```
 Replace /dev/sdX with your USB device path.
 ## Directory Structure
+```text
 Veyra/
 ├─ boot/
 │  ├─ boot.c          # UEFI bootloader
@@ -55,6 +56,7 @@ Veyra/
 │  └─ kernel.ld       # Linker script
 ├─ Makefile
 └─ LICENSE
+```
 ## Roadmap / Future Plans
 - Improve heap/free-list allocator
 - Implement bitmap-based physical memory allocator
