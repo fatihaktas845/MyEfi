@@ -39,21 +39,21 @@ Veyra/
 ├─ boot/
 │  ├─ boot.c          # UEFI bootloader
 │  └─ elf.h           # ELF64 parser header
-"├─ kernel/\n"
-"│  ├─ kernel.c        # Kernel main\n"
-"│  ├─ kernel_stub.asm # Kernel entry assembly\n"
-"│  └─ kernel.ld       # Linker script\n"
-"├─ Makefile\n"
-"└─ LICENSE\n\n"
-"## Roadmap / Future Plans\n\n"
-"- Improve heap/free-list allocator\n"
-"- Implement bitmap-based physical memory allocator\n"
-"- Extend paging management and prepare for multitasking\n"
-"- Enhance framebuffer functionality for graphics or terminal output\n\n"
-"## License\n\n"
-"MIT License © 2025 Fatih AKTAŞ\n"
-"See LICENSE file for details.\n\n"
-"## Boot Banner Suggestion\n\n"
-"A simple boot message can be displayed via framebuffer:\n\n"
-"Welcome to Veyra!\n"
-"Veyra x86_64 Kernel Loading...\n";
+├─ kernel/
+│  ├─ kernel.c        # Kernel main
+│  ├─ kernel_stub.asm # Kernel entry assembly
+│  └─ kernel.ld       # Linker script
+├─ Makefile
+└─ LICENSE
+## Roadmap / Future Plans
+- Improve heap/free-list allocator
+- Implement bitmap-based physical memory allocator
+- Extend paging management and prepare for multitasking
+- Enhance framebuffer functionality for graphics or terminal output
+## License
+MIT License © 2025 Fatih AKTAŞ
+See LICENSE file for details.
+## Boot Banner Suggestion
+A simple boot message can be displayed via framebuffer:
+Welcome to Veyra!
+Veyra x86_64 Kernel Loading...
