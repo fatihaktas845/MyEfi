@@ -1,4 +1,4 @@
-# MyOS Bootloader & Kernel
+# Veyra
 
 This project contains a simple UEFI bootloader and kernel written from scratch. It is designed an educational project to learn low-level OS development.
 

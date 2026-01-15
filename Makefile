@@ -12,7 +12,7 @@ ASM_OBJ := $(patsubst kernel/%.asm, kernel/%.o, $(ASM_SRC))
 
 BOOT_TARGET   := esp/EFI/BOOT/bootx64.efi
 KERNEL_TARGET := esp/EFI/BOOT/kernel.elf
-ISO_TARGET	  := FatOS-x86_64.iso
+ISO_TARGET	  := Veyra-x86_64-UEFI.iso
 
 .PHONY: all clear
 
