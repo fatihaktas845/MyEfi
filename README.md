@@ -18,7 +18,7 @@ The system runs entirely on low-level code written in C and x86_64 Assembly.
 - Make\
 ### Installing dependencies on Arch Linux
 ```
-sudo pacman -S --needed nasm gcc binutils make qemu ovmf
+sudo pacman -S --needed nasm gcc binutils make qemu ovmf xorriso mtools
 ```
 This installs NASM, GCC, linker tools, Make, QEMU emulator, and OVMF firmware for UEFI testing.
 ## Building
