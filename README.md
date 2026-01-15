@@ -65,7 +65,3 @@ Veyra/
 ## License
 MIT License © 2025 Fatih AKTAŞ
 See LICENSE file for details.
-## Boot Banner Suggestion
-A simple boot message can be displayed via framebuffer:
-Welcome to Veyra!
-Veyra x86_64 Kernel Loading...
