@@ -36,7 +36,7 @@ void setup_identity_map(KernelGOPInfo *kgi) {
 	uint64_t fb_aligned = fb_phys & ~((1ULL << 30) - 1);
 
 	uint64_t fb_idx = fb_aligned >> 30; // bits 38..30
-	pdpt[fb_idx] = fb_aligned | PAGE_PRESENT | PAGE_RW | PAGE_PS;
+	// pdpt[fb_idx] = fb_aligned | PAGE_PRESENT | PAGE_RW | PAGE_PS;
 
     pml4[0] = ((uint64_t)pdpt) | PAGE_PRESENT | PAGE_RW;
 
