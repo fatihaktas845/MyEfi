@@ -17,22 +17,32 @@ The system runs entirely on low-level code written in C and x86_64 Assembly.
 - QEMU (or UEFI-capable physical system)
 - Make\
 ### Installing dependencies on Arch Linux
-`sudo pacman -S --needed nasm gcc binutils make qemu ovmf`
+```
+sudo pacman -S --needed nasm gcc binutils make qemu ovmf
+```
 This installs NASM, GCC, linker tools, Make, QEMU emulator, and OVMF firmware for UEFI testing.
 ## Building
 1. Clone the repository:
-`git clone https://github.com/fatihaktas845/Veyra.git`
-`cd Veyra`
+```
+git clone https://github.com/fatihaktas845/Veyra.git
+cd Veyra
+```
 2. Build the project using Make:
-`make`
+```
+make
+```
 3. The output ISO will be:
 `Veyra-x86_64-UEFI.iso`
 ## Running / Testing
 ### QEMU
-`qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -cdrom Veyra-x86_64-UEFI.iso`
+```
+qemu-system-x86_64 -bios /usr/share/ovmf/OVMF.fd -cdrom Veyra-x86_64-UEFI.iso
+```
 ### Writing to a USB drive
-```sudo dd if=Veyra-x86_64-UEFI.iso of=/dev/sdX bs=4M status=progress
-sync```
+```
+sudo dd if=Veyra-x86_64-UEFI.iso of=/dev/sdX bs=4M status=progress
+sync
+```
 Replace /dev/sdX with your USB device path.
 ## Directory Structure
 Veyra/
