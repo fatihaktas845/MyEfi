@@ -7,6 +7,9 @@ BOOT_OBJ := $(patsubst boot/%.c, boot/%.o, $(BOOT_SRC))
 KERNEL_SRC := $(wildcard kernel/*.c)
 KERNEL_OBJ := $(patsubst kernel/%.c, kernel/%.o, $(KERNEL_SRC))
 
+ASM_SRC := $(wildcard kernel/*.asm)
+ASM_OBJ := $(patsubst kernel/%.asm, kernel/%.o, $(ASM_SRC))
+
 BOOT_TARGET   := esp/EFI/BOOT/bootx64.efi
 KERNEL_TARGET := esp/EFI/BOOT/kernel.elf
 ISO_TARGET	  := FatOS-x86_64.iso
@@ -50,7 +53,7 @@ boot/%.o: boot/%.c
 		-I ../gnu-efi/inc \
 		-c $< -o $@
 
-$(KERNEL_TARGET): $(KERNEL_OBJ)
+$(KERNEL_TARGET): $(KERNEL_OBJ) $(ASM_OBJ)
 	$(LD) $^ -o $@ \
 		-T kernel/kernel.ld \
 		-z max-page-size=0x1000
@@ -59,6 +62,9 @@ kernel/%.o: kernel/%.c
 	$(CC) -target x86_64-unknown-elf \
 		-fno-pie \
 		-c $< -o $@
+
+kernel/%.o: kernel/%.asm
+	nasm -f elf64 $< -o $@
 
 clear:
 	rm -rf esp \

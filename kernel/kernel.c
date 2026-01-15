@@ -56,12 +56,12 @@ void setup_identity_map(KernelGOPInfo *kgi) {
     );
 }
 
-void _start() {
+/* void _start() {
 	__asm__ volatile (
 		"mov %%rcx, %%rdi\n\t"
 		"call kmain": : : "rdi"
 	);
-}
+} */
 
 void kmain(KernelGOPInfo *kgi) {
 	setup_identity_map(kgi);
