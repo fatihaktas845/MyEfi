@@ -1,4 +1,4 @@
-CC := clang -ffreestanding -fno-stack-protector -mno-red-zone
+CC := clang -ffreestanding -fno-stack-protector -mno-red-zone -fno-builtin
 LD := ld.lld -nostdlib -no-pie
 
 BOOT_SRC := $(wildcard boot/*.c)
