@@ -57,10 +57,10 @@ boot/%.o: boot/%.c
 $(KERNEL_TARGET): $(KERNEL_OBJ) $(ASM_OBJ)
 	$(LD) $^ -o $@ \
 		-T kernel/kernel.ld \
-		# -z max-page-size=0x1000
 
 kernel/obj/%.o: kernel/src/%.c
 	$(CC) -target x86_64-unknown-elf \
+		-I kernel/include \
 		-fno-pie \
 		-c $< -o $@
 

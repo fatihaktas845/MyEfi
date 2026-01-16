@@ -1,21 +1,6 @@
 #include <stdint.h>
 
-typedef struct {
-    uint32_t Width;
-    uint32_t Height;
-    uint32_t PixelsPerScanLine;
-    uint64_t FrameBufferBase;
-} KernelGOPInfo;
-
-typedef struct {
-	void     *heapStart;
-    uint32_t heapSize;
-} KernelHeapInfo;
-
-typedef struct {
-    KernelGOPInfo  *kgi;
-	KernelHeapInfo *khi;
-} BootInfo;
+#include "bootInfo.h"
 
 uint32_t pps;
 volatile uint32_t *fbb;
