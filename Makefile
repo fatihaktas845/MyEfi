@@ -4,11 +4,11 @@ LD := ld.lld -nostdlib -no-pie
 BOOT_SRC := $(wildcard boot/*.c)
 BOOT_OBJ := $(patsubst boot/%.c, boot/%.o, $(BOOT_SRC))
 
-KERNEL_SRC := $(wildcard kernel/*.c)
-KERNEL_OBJ := $(patsubst kernel/%.c, kernel/%.o, $(KERNEL_SRC))
+KERNEL_SRC := $(wildcard kernel/src/*.c)
+KERNEL_OBJ := $(patsubst kernel/src/%.c, kernel/obj/%.o, $(KERNEL_SRC))
 
-ASM_SRC := $(wildcard kernel/*.asm)
-ASM_OBJ := $(patsubst kernel/%.asm, kernel/%.o, $(ASM_SRC))
+ASM_SRC := $(wildcard kernel/src/*.asm)
+ASM_OBJ := $(patsubst kernel/src/%.asm, kernel/obj/%.o, $(ASM_SRC))
 
 BOOT_TARGET   := esp/EFI/BOOT/bootx64.efi
 KERNEL_TARGET := esp/EFI/BOOT/kernel.elf
@@ -17,6 +17,7 @@ ISO_TARGET	  := Veyra-x86_64-UEFI.iso
 .PHONY: all clear
 
 $(shell mkdir -p esp/EFI/BOOT)
+$(shell mkdir -p kernel/obj)
 
 all: $(ISO_TARGET)
 	qemu-system-x86_64 -bios boot/OVMF.fd \
@@ -56,18 +57,18 @@ boot/%.o: boot/%.c
 $(KERNEL_TARGET): $(KERNEL_OBJ) $(ASM_OBJ)
 	$(LD) $^ -o $@ \
 		-T kernel/kernel.ld \
-		-z max-page-size=0x1000
+		# -z max-page-size=0x1000
 
-kernel/%.o: kernel/%.c
+kernel/obj/%.o: kernel/src/%.c
 	$(CC) -target x86_64-unknown-elf \
 		-fno-pie \
 		-c $< -o $@
 
-kernel/%.o: kernel/%.asm
+kernel/obj/%.o: kernel/src/%.asm
 	nasm -f elf64 $< -o $@
 
 clear:
 	rm -rf esp \
 		$(ISO_TARGET) \
-		kernel/*.o \
+		kernel/obj \
 		boot/*.o
