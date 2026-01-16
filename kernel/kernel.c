@@ -1,11 +1,21 @@
 #include <stdint.h>
 
 typedef struct {
-	uint32_t Width;
-	uint32_t Height;
-	uint32_t PixelsPerScanLine;
-	uint64_t FrameBufferBase;
+    uint32_t Width;
+    uint32_t Height;
+    uint32_t PixelsPerScanLine;
+    uint64_t FrameBufferBase;
 } KernelGOPInfo;
+
+typedef struct {
+	void     *heapStart;
+    uint32_t heapSize;
+} KernelHeapInfo;
+
+typedef struct {
+    KernelGOPInfo  *kgi;
+	KernelHeapInfo *khi;
+} BootInfo;
 
 uint32_t pps;
 volatile uint32_t *fbb;
@@ -19,7 +29,7 @@ uint64_t pdpt[512] __attribute__((aligned(4096)));
 // uint64_t pd[512] __attribute__((aligned(4096)));
 // uint64_t pt[512][512] __attribute__((aligned(4096)));
 
-void setup_identity_map(KernelGOPInfo *kgi) {
+void setup_identity_map() {
     /* for (int pd_i = 0; pd_i < 512; pd_i++) {
         for (int pt_i = 0; pt_i < 512; pt_i++) {
             uint64_t addr = ((pd_i * 512) + pt_i) * 0x1000;
@@ -31,12 +41,6 @@ void setup_identity_map(KernelGOPInfo *kgi) {
 	for (int i = 0; i < 512; i++) {
 		pdpt[i] = ((uint64_t)i << 30) | PAGE_PRESENT | PAGE_RW | PAGE_PS;
 	}
-
-	uint64_t fb_phys = kgi->FrameBufferBase;
-	uint64_t fb_aligned = fb_phys & ~((1ULL << 30) - 1);
-
-	uint64_t fb_idx = fb_aligned >> 30; // bits 38..30
-	// pdpt[fb_idx] = fb_aligned | PAGE_PRESENT | PAGE_RW | PAGE_PS;
 
     pml4[0] = ((uint64_t)pdpt) | PAGE_PRESENT | PAGE_RW;
 
@@ -56,21 +60,14 @@ void setup_identity_map(KernelGOPInfo *kgi) {
     );
 }
 
-/* void _start() {
-	__asm__ volatile (
-		"mov %%rcx, %%rdi\n\t"
-		"call kmain": : : "rdi"
-	);
-} */
+void kmain(BootInfo *bi) {
+	setup_identity_map();
 
-void kmain(KernelGOPInfo *kgi) {
-	setup_identity_map(kgi);
-
-	fbb = (uint32_t*)(uintptr_t)kgi->FrameBufferBase;
-	pps = kgi->PixelsPerScanLine;
+	fbb = (uint32_t*)(uintptr_t)bi->kgi->FrameBufferBase;
+	pps = bi->kgi->PixelsPerScanLine;
 	
-	for (uint32_t y = 0; y < kgi->Height; y++) {
-		for (uint32_t x = 0; x < kgi->Width; x++) {
+	for (uint32_t y = 0; y < bi->kgi->Height; y++) {
+		for (uint32_t x = 0; x < bi->kgi->Width; x++) {
 			fbb[y * pps + x] = 0x00FF0000;
 		}
 	}

@@ -34,6 +34,16 @@ typedef struct {
 	UINT64 FrameBufferBase;
 } KernelGOPInfo;
 
+typedef struct {
+	VOID   *heapStart;
+	UINT32 heapSize;
+} KernelHeapInfo;
+
+typedef struct {
+	KernelGOPInfo  *kgi;
+	KernelHeapInfo *khi;
+} BootInfo;
+
 EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	EFI_BOOT_SERVICES *bs = ST->BootServices;
 
@@ -42,7 +52,7 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	EFI_STATUS status = EFI_SUCCESS;
 	EFI_LOADED_IMAGE_PROTOCOL *lip = NULL;
 	EFI_GUID lip_guid = EFI_LOADED_IMAGE_PROTOCOL_GUID;
-
+	
 	bs->OpenProtocol(
 			ImageHandle,
 			&lip_guid,
@@ -132,14 +142,46 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	EFI_GUID gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
 	bs->LocateProtocol(&gop_guid, NULL, (VOID **)&gop);
 
-	KernelGOPInfo kgi;
-	kgi.PixelsPerScanLine = gop->Mode->Info->PixelsPerScanLine;
-	kgi.FrameBufferBase = gop->Mode->FrameBufferBase;
-	kgi.Width = gop->Mode->Info->HorizontalResolution;
-	kgi.Height = gop->Mode->Info->VerticalResolution;
+	KernelGOPInfo *kgi = NULL;
+	bs->AllocatePool(
+			EfiLoaderData,
+			sizeof(KernelGOPInfo),
+			(VOID **)&kgi);
+
+	kgi->PixelsPerScanLine = gop->Mode->Info->PixelsPerScanLine;
+	kgi->FrameBufferBase = gop->Mode->FrameBufferBase;
+	kgi->Width = gop->Mode->Info->HorizontalResolution;
+	kgi->Height = gop->Mode->Info->VerticalResolution;
+
+	KernelHeapInfo *khi = NULL;
+	bs->AllocatePool(
+			EfiLoaderData,
+			sizeof(KernelHeapInfo),
+			(VOID **)&khi);
+
+	EFI_PHYSICAL_ADDRESS heap_start_addr;
+	UINTN heap_size = 16*1024*1024;
+
+	bs->AllocatePages(
+			AllocateAnyPages,
+			EfiLoaderData,
+			EFI_SIZE_TO_PAGES(heap_size),
+			&heap_start_addr);
+
+	khi->heapStart = (VOID *)((uintptr_t)heap_start_addr);
+	khi->heapSize = heap_size;
+
+	BootInfo *bi = NULL;
+	bs->AllocatePool(
+			EfiLoaderData,
+			sizeof(BootInfo),
+			(VOID **)&bi);
+
+	bi->kgi = kgi;
+	bi->khi = khi;
 
 	VOID *entry = (VOID *)(uintptr_t)ehdr->e_entry;
-	typedef VOID (*KERNEL_ENTRY)(KernelGOPInfo *kgi);
+	typedef VOID (*KERNEL_ENTRY)(BootInfo *bi);
 	KERNEL_ENTRY kernel_entry = (KERNEL_ENTRY)entry;
 
 	UINTN MemMapSize;
@@ -167,7 +209,7 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 
 	bs->ExitBootServices(ImageHandle, MapKey);
 
-	kernel_entry(&kgi);
+	kernel_entry(bi);
 
 	return EFI_SUCCESS;
 }
