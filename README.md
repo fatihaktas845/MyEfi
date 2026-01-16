@@ -44,19 +44,6 @@ sudo dd if=Veyra-x86_64-UEFI.iso of=/dev/sdX bs=4M status=progress
 sync
 ```
 Replace /dev/sdX with your USB device path.
-## Directory Structure
-```text
-Veyra/
-├─ boot/
-│  ├─ boot.c          # UEFI bootloader
-│  └─ elf.h           # ELF64 parser header
-├─ kernel/
-│  ├─ kernel.c        # Kernel main
-│  ├─ kernel_stub.asm # Kernel entry assembly
-│  └─ kernel.ld       # Linker script
-├─ Makefile
-└─ LICENSE
-```
 ## Roadmap / Future Plans
 - Improve heap/free-list allocator
 - Implement bitmap-based physical memory allocator
