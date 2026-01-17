@@ -1,5 +1,3 @@
-#include <stdint.h>
-
 #include "bootInfo.h"
 
 uint32_t pps;

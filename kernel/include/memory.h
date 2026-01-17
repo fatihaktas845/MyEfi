@@ -3,15 +3,12 @@
 
 #include "bootInfo.h"
 
-#define NULL ((void*)0)
+typedef struct block {
+	struct block* next;
+} block_t;
 
-typedef struct free_block {
-	uint32_t size;
-	struct free_block* next;
-} free_block_t;
+block_t *freeList = NULL;
 
-free_block_t *freeList = NULL;
-
-void initHeap(KernelHeapInfo *khi);
+void initPageAllocator(KernelHeapInfo *khi);
 
 #endif // __MEMORY_H__

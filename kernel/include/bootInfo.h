@@ -1,7 +1,7 @@
 #ifndef __BOOTINFO_H__
 #define __BOOTINFO_H__
 
-#include <stdint.h>
+#include "types.h"
 
 typedef struct {
     uint32_t Width;
