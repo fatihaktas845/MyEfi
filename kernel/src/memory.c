@@ -1,5 +1,7 @@
 #include "memory.h"
 
+block_t *freeList = NULL;
+
 void initPageAllocator(KernelHeapInfo *khi) {
     size_t pageCount = khi->heapSize / 4096;
 

@@ -7,7 +7,7 @@ typedef struct block {
 	struct block* next;
 } block_t;
 
-block_t *freeList = NULL;
+extern block_t *freeList;
 
 void initPageAllocator(KernelHeapInfo *khi);
 
