@@ -1,6 +1,7 @@
 #ifndef __BOOTINFO_H__
 #define __BOOTINFO_H__
 
+#include <efi.h>
 #include "types.h"
 
 typedef struct {
@@ -16,8 +17,15 @@ typedef struct {
 } KernelHeapInfo;
 
 typedef struct {
-    KernelGOPInfo  *kgi;
-    KernelHeapInfo *khi;
+	EFI_MEMORY_DESCRIPTOR *mem_map;
+	UINTN mem_map_size;
+	UINTN desc_size;
+} KernelMemMapInfo;
+
+typedef struct {
+    KernelGOPInfo    *kgi;
+    KernelHeapInfo   *khi;
+	KernelMemMapInfo *kmmi;
 } BootInfo;
 
 #endif // __BOOTINFO_H__

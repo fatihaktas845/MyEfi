@@ -1,4 +1,4 @@
-#include "paging.h"
+#include <efi.h>
 #include "elf.h"
 
 #define PT_LOAD 1
@@ -40,9 +40,27 @@ typedef struct {
 } KernelHeapInfo;
 
 typedef struct {
-	KernelGOPInfo  *kgi;
-	KernelHeapInfo *khi;
+	EFI_MEMORY_DESCRIPTOR *mem_map;
+	UINTN mem_map_size;
+	UINTN desc_size;
+} KernelMemMapInfo;
+
+typedef struct {
+	KernelGOPInfo    *kgi;
+	KernelHeapInfo   *khi;
+	KernelMemMapInfo *kmmi;
 } BootInfo;
+
+
+
+
+static inline void outb(uint16_t port, uint8_t val)
+{
+    __asm__ volatile ( "outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
+}
+
+
+
 
 EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	EFI_BOOT_SERVICES *bs = ST->BootServices;
@@ -207,7 +225,17 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 			&DescriptorSize,
 			&DescriptorVersion);
 
-	setup_identity_map(bs, MemMap, MemMapSize, DescriptorSize);
+	KernelMemMapInfo* kmmi = NULL;
+	bs->AllocatePool(
+			EfiLoaderData,
+			sizeof(KernelMemMapInfo),
+			(VOID **)&kmmi);
+	kmmi->mem_map = MemMap;
+	kmmi->mem_map_size = MemMapSize;
+	kmmi->desc_size = DescriptorSize;
+	bi->kmmi = kmmi;
+
+	outb(0x3F8, 'A');
 
 	bs->ExitBootServices(ImageHandle, MapKey);
 

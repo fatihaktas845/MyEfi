@@ -22,7 +22,7 @@ void *alloc_page() {
 	return (void*)new_page;
 }
 
-void free_page(void* ptr) {
+void free_page(void *ptr) {
 	if (!ptr)
 		return;
 
