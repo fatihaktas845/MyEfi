@@ -27,8 +27,6 @@ all: $(ISO_TARGET)
 		-m 512M \
 		-vnc :0 \
 		-serial stdio
-		# -monitor stdio \
-		# -d int,cpu_reset
 
 $(ISO_TARGET): $(BOOT_TARGET) $(KERNEL_TARGET)
 	dd if=/dev/zero of=esp/efi.img bs=1M count=64
@@ -59,7 +57,7 @@ boot/obj/%.o: boot/src/%.c
 
 $(KERNEL_TARGET): $(KERNEL_OBJ) $(ASM_OBJ)
 	$(LD) $^ -o $@ \
-		-T kernel/kernel.ld \
+		-T kernel/kernel.ld
 
 kernel/obj/%.o: kernel/src/%.c
 	$(CC) -target x86_64-unknown-elf \

@@ -1,15 +1,23 @@
-extern kmain
-global _start
+section .text.boot
 
-section .text
+extern kmain
+extern setup_paging
+
+global _start
 
 _start:
     cld
-    mov     rdi, rcx
+
+	mov		al, 'C'
+	out		0x3F8, al
+    mov     r12, rcx
     mov     rsp, 0x00A00000
-    and     rsp, -16
-    push    0
-    call    kmain
+    call    setup_paging
+
+	mov		rdi, r12
+
+	mov		rax, kmain
+	call	rax
 
 .hang:
     cli
