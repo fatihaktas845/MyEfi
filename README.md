@@ -6,19 +6,17 @@ The system runs entirely on low-level code written in C and x86_64 Assembly.
 - UEFI-only bootloader (boot.c)
 - PE32+ → ELF64 ABI conversion
 - Simple ELF64 parser and kernel loader
-- Kernel-side identity-mapped 1 GiB memory
-- Fixed heap with a simple free-list allocator (planned)
-- Minimal framebuffer usage (kernel currently paints the screen red)
+- High-Half mapped kernel
 - Mix of Intel x86_64 Assembly and C for kernel entry (kernel_stub.asm)
 ## Requirements
 - NASM ≥ 2.15
-- GCC and Binutils (x86_64 target)
-- LD linker
+- Clang Compiler
+- LLD Linker
 - QEMU (or UEFI-capable physical system)
-- Make\
+- Make
 ### Installing dependencies on Arch Linux
 ```
-sudo pacman -S --needed nasm gcc binutils make qemu ovmf xorriso mtools
+sudo pacman -S --needed nasm clang make qemu ovmf xorriso mtools
 ```
 This installs NASM, GCC, linker tools, Make, QEMU emulator, and OVMF firmware for UEFI testing.
 ## Building
