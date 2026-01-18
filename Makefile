@@ -1,8 +1,8 @@
 CC := clang -ffreestanding -fno-stack-protector -mno-red-zone -fno-builtin
 LD := ld.lld -nostdlib -no-pie
 
-BOOT_SRC := $(wildcard boot/*.c)
-BOOT_OBJ := $(patsubst boot/%.c, boot/%.o, $(BOOT_SRC))
+BOOT_SRC := $(wildcard boot/src/*.c)
+BOOT_OBJ := $(patsubst boot/src/%.c, boot/obj/%.o, $(BOOT_SRC))
 
 KERNEL_SRC := $(wildcard kernel/src/*.c)
 KERNEL_OBJ := $(patsubst kernel/src/%.c, kernel/obj/%.o, $(KERNEL_SRC))
@@ -18,6 +18,7 @@ ISO_TARGET	  := Veyra-x86_64-UEFI.iso
 
 $(shell mkdir -p esp/EFI/BOOT)
 $(shell mkdir -p kernel/obj)
+$(shell mkdir -p boot/obj)
 
 all: $(ISO_TARGET)
 	qemu-system-x86_64 -bios boot/OVMF.fd \
@@ -48,10 +49,10 @@ $(BOOT_TARGET): $(BOOT_OBJ)
 		-nostdlib \
 		$^ -o $@
 
-boot/%.o: boot/%.c
+boot/obj/%.o: boot/src/%.c
 	$(CC) -target x86_64-unknown-windows \
 		-fshort-wchar \
-		-I ../gnu-efi/inc \
+		-I ../gnu-efi/inc -I boot/include \
 		-c $< -o $@
 
 $(KERNEL_TARGET): $(KERNEL_OBJ) $(ASM_OBJ)
@@ -71,4 +72,4 @@ clear:
 	rm -rf esp \
 		$(ISO_TARGET) \
 		kernel/obj \
-		boot/*.o
+		boot/obj

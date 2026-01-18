@@ -1,4 +1,4 @@
-#include <efi.h>
+#include "paging.h"
 #include "elf.h"
 
 #define PT_LOAD 1
@@ -206,6 +206,8 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 			&MapKey,
 			&DescriptorSize,
 			&DescriptorVersion);
+
+	setup_identity_map(bs, MemMap, MemMapSize, DescriptorSize);
 
 	bs->ExitBootServices(ImageHandle, MapKey);
 
