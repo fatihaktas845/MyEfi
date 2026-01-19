@@ -8,13 +8,12 @@ global _start
 _start:
     cld
 
-	mov		al, 'C'
-	out		0x3F8, al
-    mov     r12, rcx
-    mov     rsp, 0x00A00000
-    call    setup_paging
+	mov		rdx, 0x00000666
 
-	mov		rdi, r12
+    mov     rsp, 0x00A00000
+	mov		rdx, 0x00000555
+    call    setup_paging
+	mov		rdx, 0x00000444
 
 	mov		rax, kmain
 	call	rax

@@ -1,8 +1,6 @@
 #include <efi.h>
 #include "elf.h"
 
-#define PT_LOAD 1
-
 #define PF_X	0x1
 #define PF_W	0x2
 #define PF_R	0x4
@@ -60,6 +58,16 @@ static inline void outb(uint16_t port, uint8_t val)
 }
 
 
+
+void uint64_to_char16(UINT64 val, CHAR16* buf) {
+    const CHAR16 hex[] = L"0123456789ABCDEF";
+    int i;
+    for (i = 0; i < 16; i++) {          // 64-bit = 16 hex hane
+        buf[15 - i] = hex[val & 0xF];
+        val >>= 4;
+    }
+    buf[16] = L'\0';                     // null-terminate
+}
 
 
 EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
@@ -127,6 +135,11 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 		UINTN memsize = phdr_table[i].p_memsz;
 		UINTN filesize = phdr_table[i].p_filesz;
 		EFI_PHYSICAL_ADDRESS vaddr = phdr_table[i].p_paddr;
+
+		CHAR16 buf[32];
+		uint64_to_char16(phdr_table[i].p_vaddr, buf);
+		ST->ConOut->OutputString(ST->ConOut, buf);
+		ST->ConOut->OutputString(ST->ConOut, L"\n");
 		
 		/* if (phdr_table[i].p_vaddr < virt)
 			vaddr = phdr_table[i].p_vaddr;
@@ -250,6 +263,8 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	outb(0x3F8, 'A');
 
 	bs->ExitBootServices(ImageHandle, MapKey);
+
+	outb(0x3F8, 'L');
 
 	kernel_entry(bi);
 

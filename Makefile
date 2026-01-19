@@ -25,8 +25,8 @@ all: $(ISO_TARGET)
 		-drive if=virtio,format=raw,file=$(ISO_TARGET) \
 		-net none \
 		-m 512M \
-		-vnc :0 \
-		-serial stdio
+		-nographic \
+		-d int,cpu_reset
 
 $(ISO_TARGET): $(BOOT_TARGET) $(KERNEL_TARGET)
 	dd if=/dev/zero of=esp/efi.img bs=1M count=64

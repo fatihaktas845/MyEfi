@@ -34,37 +34,36 @@ SECTIONS
         *(.data.boot)
     }
 
-    .bss.boot ALIGN(0x1000) : AT(0x00300000)
+    .bss.boot ALIGN(0x1000) :
     {
         *(.bss.boot)
         *(COMMON)
     }
 
-	_boot_end = 0x00400000;
-
 
     /* =====================================================
      *  HIGH-HALF KERNEL
      * ===================================================== */
-    . = KERNEL_VIRT_BASE;
+    . += KERNEL_VIRT_BASE;
 
-    .text ALIGN(0x1000) : AT(_boot_end)
+    .text ALIGN(0x1000) : AT(ADDR(.text) - KERNEL_VIRT_BASE)
     {
         *(.text*)
     }
 
-    .rodata ALIGN(0x1000) : AT(_boot_end + SIZEOF(.text))
+    .rodata ALIGN(0x1000) : AT(ADDR(.rodata) - KERNEL_VIRT_BASE)
     {
         *(.rodata*)
     }
 
-    .data ALIGN(0x1000) : AT(_boot_end + SIZEOF(.text) + SIZEOF(.rodata))
+    .data ALIGN(0x1000) : AT(ADDR(.data) - KERNEL_VIRT_BASE)
     {
         *(.data*)
     }
 
-    .bss ALIGN(0x1000) : AT(_boot_end + SIZEOF(.text) + SIZEOF(.rodata) + SIZEOF(.data))
+    .bss ALIGN(0x1000) : AT(ADDR(.bss) - KERNEL_VIRT_BASE)
     {
         *(.bss*)
+		*(COMMON)
     }
 }
