@@ -7,7 +7,8 @@ global _start
 
 _start:
     cld
-	
+	cli
+	mov		rdi, rcx
     mov     rsp, 0x00A00000
     call    setup_paging
 
