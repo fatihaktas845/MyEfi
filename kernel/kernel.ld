@@ -1,23 +1,21 @@
 OUTPUT_FORMAT(elf64-x86-64)
 ENTRY(_start)
 
+/* =====================================================
+ *  SABİT ADRESLER
+ * ===================================================== */
 KERNEL_PHYS_BASE = 0x00200000;
 KERNEL_VIRT_BASE = 0xFFFFFFFF80000000;
-
-/* PHDRS
-{
-    boot_text PT_LOAD FLAGS(5);
-    boot_data PT_LOAD FLAGS(6);
-    kern_text PT_LOAD FLAGS(5);
-    kern_data PT_LOAD FLAGS(6);
-} */
+KERNEL_OFFSET    = KERNEL_VIRT_BASE - KERNEL_PHYS_BASE;
 
 SECTIONS
 {
     /* =====================================================
-     *  BOOT / PAGING ÖNCESİ (LOW VA, IDENTITY MAPPED)
+     *  BOOT / EARLY STAGE (LOW, IDENTITY MAPPED)
      * ===================================================== */
     . = KERNEL_PHYS_BASE;
+
+    __boot_start = .;
 
     .text.boot ALIGN(0x1000) :
     {
@@ -40,30 +38,35 @@ SECTIONS
         *(COMMON)
     }
 
+    __boot_end = .;
 
     /* =====================================================
      *  HIGH-HALF KERNEL
      * ===================================================== */
-    . += KERNEL_VIRT_BASE;
+    . = KERNEL_VIRT_BASE + (__boot_end - KERNEL_PHYS_BASE);
 
-    .text ALIGN(0x1000) : AT(ADDR(.text) - KERNEL_VIRT_BASE)
+    __kernel_start = .;
+
+    .text ALIGN(0x1000) : AT(ADDR(.text) - KERNEL_OFFSET)
     {
         *(.text*)
     }
 
-    .rodata ALIGN(0x1000) : AT(ADDR(.rodata) - KERNEL_VIRT_BASE)
+    .rodata ALIGN(0x1000) : AT(ADDR(.rodata) - KERNEL_OFFSET)
     {
         *(.rodata*)
     }
 
-    .data ALIGN(0x1000) : AT(ADDR(.data) - KERNEL_VIRT_BASE)
+    .data ALIGN(0x1000) : AT(ADDR(.data) - KERNEL_OFFSET)
     {
         *(.data*)
     }
 
-    .bss ALIGN(0x1000) : AT(ADDR(.bss) - KERNEL_VIRT_BASE)
+    .bss ALIGN(0x1000) : AT(ADDR(.bss) - KERNEL_OFFSET)
     {
         *(.bss*)
-		*(COMMON)
+        *(COMMON)
     }
+
+    __kernel_end = .;
 }

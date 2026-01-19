@@ -126,26 +126,18 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	kernelFile->SetPosition(kernelFile, ehdr->e_phoff);
 	kernelFile->Read(kernelFile, &phdr_table_size, (VOID *)phdr_table);
 
-	outb(0x3F8, 'B');
-
 	EFI_PHYSICAL_ADDRESS phys = 0x00200000ULL;
 	EFI_PHYSICAL_ADDRESS virt = 0xFFFFFFFF80000000ULL;
 
 	for (uint32_t i = 0; i < ehdr->e_phnum; i++) {
 		UINTN memsize = phdr_table[i].p_memsz;
 		UINTN filesize = phdr_table[i].p_filesz;
-		EFI_PHYSICAL_ADDRESS vaddr = phdr_table[i].p_paddr;
+		EFI_PHYSICAL_ADDRESS vaddr;
 
-		CHAR16 buf[32];
-		uint64_to_char16(phdr_table[i].p_vaddr, buf);
-		ST->ConOut->OutputString(ST->ConOut, buf);
-		ST->ConOut->OutputString(ST->ConOut, L"\n");
-		
-		/* if (phdr_table[i].p_vaddr < virt)
+		if (phdr_table[i].p_vaddr >= virt)
+			vaddr = phys + (phdr_table[i].p_vaddr - virt);
+		else
 			vaddr = phdr_table[i].p_vaddr;
-		else {
-			vaddr = phys + phys + (phdr_table[i].p_vaddr - virt);
-		} */
 
 		VOID *p_vaddr = (VOID *)(uintptr_t)vaddr;
 
@@ -260,13 +252,13 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	kmmi->desc_size = DescriptorSize;
 	bi->kmmi = kmmi;
 
-	outb(0x3F8, 'A');
-
 	bs->ExitBootServices(ImageHandle, MapKey);
 
-	outb(0x3F8, 'L');
+	typedef void (*entry_t)(void);
+	entry_t yarak = (entry_t)0x00A00000;
 
 	kernel_entry(bi);
+	// yarak();
 
 	return EFI_SUCCESS;
 }
