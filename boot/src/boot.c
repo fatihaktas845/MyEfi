@@ -132,9 +132,9 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	for (uint32_t i = 0; i < ehdr->e_phnum; i++) {
 		UINTN memsize = phdr_table[i].p_memsz;
 		UINTN filesize = phdr_table[i].p_filesz;
-		EFI_PHYSICAL_ADDRESS load_addr = phdr_table[i].p_vaddr;
+		EFI_PHYSICAL_ADDRESS load_addr;
 
-		// load_addr = phys + (phdr_table[i].p_vaddr - virt);
+		load_addr = phys + (phdr_table[i].p_vaddr - virt);
 
 		VOID *p_vaddr = (VOID *)(uintptr_t)load_addr;
 
@@ -252,6 +252,7 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 
 	init_pml4(bs);
 	setup_identity_map(bs, MemMap, MemMapSize, DescriptorSize);
+	setup_high_half_map(bs);
 	
 
 	bs->ExitBootServices(ImageHandle, MapKey);

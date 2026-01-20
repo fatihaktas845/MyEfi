@@ -13,6 +13,8 @@ void setup_identity_map(
 		UINTN mem_map_size,
 		UINTN desc_size);
 
+void setup_high_half_map(EFI_BOOT_SERVICES *bs);
+
 void load_cr3();
 
 #endif // __PAGING_H__
