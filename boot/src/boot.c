@@ -1,5 +1,5 @@
-#include <efi.h>
 #include "elf.h"
+#include "paging.h"
 
 #define PF_X	0x1
 #define PF_W	0x2
@@ -15,9 +15,9 @@ void *memcpy(void *dest, void *src, uint64_t n) {
 	return dest;
 }
 
-void *memset(void *dest, uint64_t value, uint64_t n) {
+void *memset(void *dest, uint8_t value, uint64_t n) {
 	uint8_t *d = (uint8_t*)dest;
-	uint8_t v = (uint8_t)value;
+	uint8_t v = value;
 
 	for (uint32_t i = 0; i < n; i++)
 		d[i] = v;
@@ -132,14 +132,11 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	for (uint32_t i = 0; i < ehdr->e_phnum; i++) {
 		UINTN memsize = phdr_table[i].p_memsz;
 		UINTN filesize = phdr_table[i].p_filesz;
-		EFI_PHYSICAL_ADDRESS vaddr;
+		EFI_PHYSICAL_ADDRESS load_addr = phdr_table[i].p_vaddr;
 
-		if (phdr_table[i].p_vaddr >= virt)
-			vaddr = phys + (phdr_table[i].p_vaddr - virt);
-		else
-			vaddr = phdr_table[i].p_vaddr;
+		// load_addr = phys + (phdr_table[i].p_vaddr - virt);
 
-		VOID *p_vaddr = (VOID *)(uintptr_t)vaddr;
+		VOID *p_vaddr = (VOID *)(uintptr_t)load_addr;
 
 		EFI_MEMORY_TYPE memType;
 		memType = (phdr_table[i].p_flags & PF_X) ? EfiLoaderCode : EfiLoaderData;
@@ -148,7 +145,8 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 				AllocateAddress,
 				memType,
 				EFI_SIZE_TO_PAGES(memsize),
-				&vaddr);
+				&load_addr);
+
 		kernelFile->SetPosition(kernelFile, phdr_table[i].p_offset);
 		kernelFile->Read(kernelFile, &filesize, p_vaddr);
 
@@ -252,13 +250,15 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	kmmi->desc_size = DescriptorSize;
 	bi->kmmi = kmmi;
 
+	init_pml4(bs);
+	setup_identity_map(bs, MemMap, MemMapSize, DescriptorSize);
+	
+
 	bs->ExitBootServices(ImageHandle, MapKey);
 
-	typedef void (*entry_t)(void);
-	entry_t yarak = (entry_t)0x00A00000;
+	load_cr3();
 
 	kernel_entry(bi);
-	// yarak();
 
 	return EFI_SUCCESS;
 }

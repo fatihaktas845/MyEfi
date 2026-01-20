@@ -25,7 +25,7 @@ all: $(ISO_TARGET)
 		-drive if=virtio,format=raw,file=$(ISO_TARGET) \
 		-net none \
 		-m 512M \
-		-nographic \
+		-vnc :0 \
 		-d int,cpu_reset
 
 $(ISO_TARGET): $(BOOT_TARGET) $(KERNEL_TARGET)

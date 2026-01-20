@@ -1,7 +1,6 @@
-section .text.boot
+section .text
 
 extern kmain
-extern setup_paging
 
 global _start
 
@@ -10,7 +9,6 @@ _start:
 	cli
 	mov		rdi, rcx
     mov     rsp, 0x00A00000
-    call    setup_paging
 
 	mov		rax, kmain
 	jmp		rax
