@@ -251,7 +251,7 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	bi->kmmi = kmmi;
 
 	init_pml4(bs);
-	setup_identity_map(bs, MemMap, MemMapSize, DescriptorSize);
+	setup_identity_map(bs);
 	setup_high_half_map(bs);
 	
 

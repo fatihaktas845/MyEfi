@@ -28,4 +28,12 @@ SECTIONS
         *(.bss*)
         *(COMMON)
     }
+
+	.stack ALIGN(0x1000) :
+	{
+		__stack_start = .;
+		*(.stack*)
+		. += 16K;
+		__stack_end = .;
+	}
 }

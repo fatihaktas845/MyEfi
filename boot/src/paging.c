@@ -2,6 +2,7 @@
 
 #define PAGE_PRESENT (1ULL << 0)
 #define PAGE_RW      (1ULL << 1)
+#define PAGE_PS      (1ULL << 7)
 
 uint64_t *pml4;
 
@@ -27,7 +28,7 @@ void map_address(EFI_BOOT_SERVICES *bs, UINT64 pa, UINT64 va) {
 	uint64_t pml4_index = (va >> 39) & 0x1FF;
 	uint64_t pdpt_index = (va >> 30) & 0x1FF;
 	uint64_t pd_index   = (va >> 21) & 0x1FF;
-	uint64_t pt_index   = (va >> 12) & 0x1FF;
+	// uint64_t pt_index   = (va >> 12) & 0x1FF;
 
 	uint64_t *pdpt;
 	if (pml4[pml4_index] & PAGE_PRESENT)
@@ -47,7 +48,9 @@ void map_address(EFI_BOOT_SERVICES *bs, UINT64 pa, UINT64 va) {
 		pdpt[pdpt_index] = (uint64_t)pd | PAGE_PRESENT | PAGE_RW;
 	}
 
-	uint64_t *pt;
+	pd[pd_index] = pa | PAGE_PRESENT | PAGE_RW | PAGE_PS;
+
+	/* uint64_t *pt;
 	if (pd[pd_index] & PAGE_PRESENT)
 		pt = (uint64_t *)(pd[pd_index] & ~0xFFF);
 	else {
@@ -56,24 +59,11 @@ void map_address(EFI_BOOT_SERVICES *bs, UINT64 pa, UINT64 va) {
 		pd[pd_index] = (uint64_t)pt | PAGE_PRESENT | PAGE_RW;
 	}
 
-	pt[pt_index] = pa | PAGE_PRESENT | PAGE_RW;
-
+	pt[pt_index] = pa | PAGE_PRESENT | PAGE_RW; */
 }
 
-void setup_identity_map(
-		EFI_BOOT_SERVICES *bs,
-		EFI_MEMORY_DESCRIPTOR *mem_map,
-		UINTN mem_map_size,
-		UINTN desc_size) {
-	/* for (size_t i = 0; i < mem_map_size / desc_size; i++) {
-		EFI_PHYSICAL_ADDRESS start = mem_map[i].PhysicalStart;
-
-		for (size_t j = 0; j < mem_map[i].NumberOfPages; j++) {
-			map_address(bs, start + j * 0x1000, start + j *0x1000);
-		}
-	} */
-
-	for (uint64_t addr = 0; addr < 4ULL * 0x40000000ULL; addr += 0x1000) {
+void setup_identity_map(EFI_BOOT_SERVICES *bs) {
+	for (uint64_t addr = 0; addr < 4ULL * 0x40000000ULL; addr += 0x200000ULL) {
 		map_address(bs, addr, addr);
 	}
 }
@@ -82,7 +72,7 @@ void setup_high_half_map(EFI_BOOT_SERVICES *bs) {
 	uint64_t kernel_phys = 0x200000ULL;
 	uint64_t kernel_virt = 0xFFFFFFFF80000000ULL;
 
-	for (uint64_t offset = 0; offset < 4ULL * 0x100000ULL; offset += 0x1000ULL) {
+	for (uint64_t offset = 0; offset < 4ULL * 0x100000ULL; offset += 0x200000ULL) {
 		map_address(bs, kernel_phys + offset, kernel_virt + offset);
 	}
 }
