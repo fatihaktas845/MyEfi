@@ -18,7 +18,7 @@ The system runs entirely on low-level code written in C and x86_64 Assembly.
 ```
 sudo pacman -S --needed nasm clang make qemu ovmf xorriso mtools
 ```
-This installs NASM, GCC, linker tools, Make, QEMU emulator, and OVMF firmware for UEFI testing.
+This installs NASM, Clang, linker tools, Make, QEMU emulator, and OVMF firmware for UEFI testing.
 ## Building
 1. Clone the repository:
 ```
