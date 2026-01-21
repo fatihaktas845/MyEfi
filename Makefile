@@ -26,7 +26,7 @@ all: $(ISO_TARGET)
 		-net none \
 		-m 512M \
 		-vnc :0 \
-		-d int,cpu_reset
+		-serial stdio
 
 $(ISO_TARGET): $(BOOT_TARGET) $(KERNEL_TARGET)
 	dd if=/dev/zero of=esp/efi.img bs=1M count=64
