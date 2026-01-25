@@ -16,7 +16,7 @@ global _start
 _start:
     cld
 	cli
-	mov		[bootInfo], rcx
+	mov		[bootInfo], rdi
     mov     rsp, __stack_end
 
 	call	initGDT

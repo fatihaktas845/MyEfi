@@ -188,9 +188,9 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 
 	bi->kgi = kgi;
 
-	VOID *entry = (VOID *)(uintptr_t)ehdr->e_entry;
-	typedef VOID (*KERNEL_ENTRY)(BootInfo *bi);
-	KERNEL_ENTRY kernel_entry = (KERNEL_ENTRY)entry;
+	uint64_t entry = (uint64_t)ehdr->e_entry;
+	/* typedef VOID (*KERNEL_ENTRY)(BootInfo *bi);
+	KERNEL_ENTRY kernel_entry = (KERNEL_ENTRY)entry; */
 
 	UINTN MemMapSize;
 	UINTN MapKey;
@@ -234,7 +234,13 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 
 	load_cr3();
 
-	kernel_entry(bi);
+	__asm__ volatile (
+		"mov %0, %%rdi\n"
+		"jmp *%1"
+		:
+		: "r"(bi), "r"(entry)
+		: "rdi"
+	);
 
 	return EFI_SUCCESS;
 }
