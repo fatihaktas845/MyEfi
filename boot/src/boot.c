@@ -33,11 +33,6 @@ typedef struct {
 } KernelGOPInfo;
 
 typedef struct {
-	VOID   *heapStart;
-	UINT32 heapSize;
-} KernelHeapInfo;
-
-typedef struct {
 	EFI_MEMORY_DESCRIPTOR *mem_map;
 	UINTN mem_map_size;
 	UINTN desc_size;
@@ -45,7 +40,6 @@ typedef struct {
 
 typedef struct {
 	KernelGOPInfo    *kgi;
-	KernelHeapInfo   *khi;
 	KernelMemMapInfo *kmmi;
 } BootInfo;
 
@@ -186,24 +180,6 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	kgi->Width = gop->Mode->Info->HorizontalResolution;
 	kgi->Height = gop->Mode->Info->VerticalResolution;
 
-	KernelHeapInfo *khi = NULL;
-	bs->AllocatePool(
-			EfiLoaderData,
-			sizeof(KernelHeapInfo),
-			(VOID **)&khi);
-
-	EFI_PHYSICAL_ADDRESS heap_start_addr;
-	UINTN heap_size = 16*1024*1024;
-
-	bs->AllocatePages(
-			AllocateAnyPages,
-			EfiLoaderData,
-			EFI_SIZE_TO_PAGES(heap_size),
-			&heap_start_addr);
-
-	khi->heapStart = (VOID *)((uintptr_t)heap_start_addr);
-	khi->heapSize = heap_size;
-
 	BootInfo *bi = NULL;
 	bs->AllocatePool(
 			EfiLoaderData,
@@ -211,7 +187,6 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 			(VOID **)&bi);
 
 	bi->kgi = kgi;
-	bi->khi = khi;
 
 	VOID *entry = (VOID *)(uintptr_t)ehdr->e_entry;
 	typedef VOID (*KERNEL_ENTRY)(BootInfo *bi);

@@ -12,7 +12,7 @@ struct GDTEntry {
 	uint8_t  baseHigh;
 } __attribute((packed));
 
-struct GDTPtr {
+struct GDTR {
 	uint16_t limit;
 	uint64_t base;
 } __attribute__((packed));

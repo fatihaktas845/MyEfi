@@ -9,8 +9,8 @@ typedef struct block {
 
 extern block_t *freeList;
 
-void initPageAllocator(KernelHeapInfo *khi);
-void *alloc_page();
-void free_page(void *ptr);
+void initPageAllocator();
+void *allocPage();
+void freePage(void *ptr);
 
 #endif // __MEMORY_H__

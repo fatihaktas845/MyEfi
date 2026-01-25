@@ -12,11 +12,6 @@ typedef struct {
 } KernelGOPInfo;
 
 typedef struct {
-    void     *heapStart;
-    uint32_t heapSize;
-} KernelHeapInfo;
-
-typedef struct {
 	EFI_MEMORY_DESCRIPTOR *mem_map;
 	UINTN mem_map_size;
 	UINTN desc_size;
@@ -24,7 +19,6 @@ typedef struct {
 
 typedef struct {
     KernelGOPInfo    *kgi;
-    KernelHeapInfo   *khi;
 	KernelMemMapInfo *kmmi;
 } BootInfo;
 

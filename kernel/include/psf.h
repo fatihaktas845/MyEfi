@@ -18,12 +18,14 @@ void drawChar(
 		uint8_t ascii,
 		uint32_t x,
 		uint32_t y,
-		uint8_t scale);
+		uint8_t scale,
+		uint32_t color);
 
 void printString(
 		const char *str,
 		uint32_t x,
 		uint32_t y,
-		uint8_t scale);
+		uint8_t scale,
+		uint32_t color);
 
 #endif // PSF_H

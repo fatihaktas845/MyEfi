@@ -2,11 +2,13 @@
 
 block_t *freeList = NULL;
 
-void initPageAllocator(KernelHeapInfo *khi) {
-    size_t pageCount = khi->heapSize / 4096;
+extern uint8_t *__kernel_heap_start;
+
+void initPageAllocator() {
+    size_t pageCount = 16 * 1024 * 1024 / 4096;
 
 	for (size_t i = 0; i < pageCount; i++) {
-		block_t *page = (block_t*)((uint8_t*)khi->heapStart + i * 4096);
+		block_t *page = (block_t*)(__kernel_heap_start + i * 4096);
 		page->next = freeList;
 		freeList = page;
 	}

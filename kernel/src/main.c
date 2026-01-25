@@ -15,13 +15,10 @@ void kmain() {
 	uint32_t pps = bi->kgi->PixelsPerScanLine;
 
 	initPSFv1(fbb, pps);
-	printString("Welcome To Veyra!", 200, 300, 7);
+	printString("Welcome To Veyra!", 200, 300, 7, 0x00FFFFFF);
 
-	/* for (int i = 0; i < 100; i++) {
-		for (int j = 0; j < 100; j++) {
-			fbb[i + j *pps] = 0x00FF0000;
-		}
-	} */
+	/* int a = 1, b = 0;
+	int c = a / b; // To test IDT #DE */
 
 	while (1);
 }

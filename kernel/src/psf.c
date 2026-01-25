@@ -19,7 +19,8 @@ void drawChar(
 		uint8_t ascii,
 		uint32_t x,
 		uint32_t y,
-		uint8_t scale) {
+		uint8_t scale,
+		uint32_t color) {
 	uint8_t *glyph = glyphStart + ascii * header->charsize;
 
 	for (uint32_t row = 0; row < header->charsize; row++) {
@@ -31,7 +32,7 @@ void drawChar(
                     for (uint32_t sx = 0; sx < scale; sx++) {
                         uint32_t pX = x + col * scale + sx;
                         uint32_t pY = y + row * scale + sy;
-                        fbb[pY * pps + pX] = 0x00FFFFFF;
+                        fbb[pY * pps + pX] = color;
                     }
                 }
             }
@@ -43,10 +44,11 @@ void printString(
 		const char *str,
 		uint32_t x,
 		uint32_t y,
-		uint8_t scale) {
+		uint8_t scale,
+		uint32_t color) {
 	uint32_t newX = x;
 	for (uint32_t i = 0; str[i]; i++) {
-		drawChar(str[i], newX, y, scale);
+		drawChar(str[i], newX, y, scale, color);
 		newX += 8 * scale;
 	}
 }

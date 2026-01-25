@@ -36,4 +36,11 @@ SECTIONS
 		. += 16K;
 		__stack_end = .;
 	}
+
+	.heap ALIGN(0x1000) :
+	{
+		__kernel_heap_start = .;
+		*(.heap*)
+		. += 16M;
+	}
 }

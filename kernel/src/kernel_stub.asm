@@ -3,6 +3,9 @@ section .text
 extern initGDT
 extern gdtPtr
 
+extern initIDT
+extern idtPtr
+
 extern __stack_end
 
 extern kmain
@@ -18,6 +21,9 @@ _start:
 
 	call	initGDT
 	lgdt	[gdtPtr]
+
+	call	initIDT
+	lidt	[idtPtr]
 
 	; far jump for CS Reload
 	push	0x08
