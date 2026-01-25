@@ -9,14 +9,21 @@ typedef struct {
 	uint8_t charsize;
 } PSFv1_HEADER;
 
-void initPSFv1();
+extern volatile uint32_t *fbb;
+extern uint32_t pps;
+
+void initPSFv1(volatile uint32_t *Fbb, uint32_t Pps);
 
 void drawChar(
 		uint8_t ascii,
 		uint32_t x,
 		uint32_t y,
-		volatile uint32_t *fbb,
-		uint32_t pps,
+		uint8_t scale);
+
+void printString(
+		const char *str,
+		uint32_t x,
+		uint32_t y,
 		uint8_t scale);
 
 #endif // PSF_H

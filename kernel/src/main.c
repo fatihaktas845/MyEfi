@@ -14,8 +14,8 @@ void kmain() {
 	volatile uint32_t *fbb = (uint32_t*)bi->kgi->FrameBufferBase;
 	uint32_t pps = bi->kgi->PixelsPerScanLine;
 
-	initPSFv1();
-	drawChar('A', 200, 300, fbb, pps, 16);
+	initPSFv1(fbb, pps);
+	printString("Welcome To Veyra!", 200, 300, 7);
 
 	/* for (int i = 0; i < 100; i++) {
 		for (int j = 0; j < 100; j++) {
