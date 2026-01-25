@@ -15,7 +15,7 @@ _start:
 	cli
 	mov		[bootInfo], rcx
     mov     rsp, __stack_end
-	sub		rsp, 8
+
 	call	initGDT
 	lgdt	[gdtPtr]
 
