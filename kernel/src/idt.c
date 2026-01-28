@@ -24,7 +24,7 @@ void initIDT() {
 }
 
 void divideError() {
-	printString("Divide Error!", 0, 0, 5, 0x00FF0000);
+	printk("Divide Error!", 0x00FF0000);
 
 	while (1) {
 		__asm__ volatile("hlt");

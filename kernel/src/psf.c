@@ -7,6 +7,9 @@ uint8_t *glyphStart;
 volatile uint32_t *fbb;
 uint32_t pps;
 
+static uint64_t cursorX = 0;
+static uint64_t cursorY = 0;
+
 void initPSFv1(volatile uint32_t *Fbb, uint32_t Pps) {
 	header = (PSFv1_HEADER*)lat1_08_psf;
 	glyphStart = (uint8_t*)header + sizeof(PSFv1_HEADER);
@@ -40,15 +43,16 @@ void drawChar(
 	}
 }
 
-void printString(
-		const char *str,
-		uint32_t x,
-		uint32_t y,
-		uint8_t scale,
-		uint32_t color) {
-	uint32_t newX = x;
+void printk(const char *str, uint32_t color) {
+	uint8_t scale = 2;
 	for (uint32_t i = 0; str[i]; i++) {
-		drawChar(str[i], newX, y, scale, color);
-		newX += 8 * scale;
+		if (str[i] == '\n') {
+			cursorX = 0;
+			cursorY += scale * header->charsize;
+			continue;
+		}
+
+		drawChar(str[i], cursorX, cursorY, scale, color);
+		cursorX += 8 * scale;
 	}
 }
