@@ -41,6 +41,6 @@ SECTIONS
 	{
 		__kernel_heap_start = .;
 		*(.heap*)
-		. += 16M;
+		. += 4M;
 	}
 }
