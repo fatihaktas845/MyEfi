@@ -17,10 +17,9 @@ void *memcpy(void *dest, void *src, uint64_t n) {
 
 void *memset(void *dest, uint8_t value, uint64_t n) {
 	uint8_t *d = (uint8_t*)dest;
-	uint8_t v = value;
 
 	for (uint32_t i = 0; i < n; i++)
-		d[i] = v;
+		d[i] = value;
 
 	return dest;
 }

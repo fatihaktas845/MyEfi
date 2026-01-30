@@ -63,7 +63,7 @@ void map_address(EFI_BOOT_SERVICES *bs, UINT64 pa, UINT64 va) {
 }
 
 void setup_identity_map(EFI_BOOT_SERVICES *bs) {
-	for (uint64_t addr = 0; addr < 4ULL * 0x40000000ULL; addr += 0x200000ULL) {
+	for (uint64_t addr = 0; addr < 20ULL * 0x40000000ULL; addr += 0x200000ULL) {
 		map_address(bs, addr, addr);
 	}
 }

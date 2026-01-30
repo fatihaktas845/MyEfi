@@ -10,29 +10,29 @@ SECTIONS
 
     .text ALIGN(0x1000) :
     {
-        *(.text*)
+        KEEP(*(.text*))
     }
 
     .rodata ALIGN(0x1000) :
     {
-        *(.rodata*)
+        KEEP(*(.rodata*))
     }
 
     .data ALIGN(0x1000) :
     {
-        *(.data*)
+        KEEP(*(.data*))
     }
 
     .bss ALIGN(0x1000) :
     {
-        *(.bss*)
-        *(COMMON)
+        KEEP(*(.bss*))
+        KEEP(*(COMMON))
     }
 
 	.stack ALIGN(0x1000) :
 	{
 		__stack_start = .;
-		*(.stack*)
+		KEEP(*(.stack*))
 		. += 16K;
 		__stack_end = .;
 	}
@@ -40,7 +40,7 @@ SECTIONS
 	.heap ALIGN(0x1000) :
 	{
 		__kernel_heap_start = .;
-		*(.heap*)
+		KEEP(*(.heap*))
 		. += 4M;
 	}
 }

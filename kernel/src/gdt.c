@@ -1,6 +1,6 @@
 #include "gdt.h"
 
-struct GDTEntry gdtEntries[3];
+struct GDTEntry gdtEntries[5];
 struct GDTR gdtPtr;
 
 void setupGDTEntry(
@@ -19,8 +19,10 @@ void setupGDTEntry(
 
 void initGDT() {
 	setupGDTEntry(0, 0, 0, 0, 0); // NULL Descriptor
-	setupGDTEntry(1, 0, 0x0FFFFF, 0x9A, 0x0A); // Kernel Code Descriptor
-	setupGDTEntry(2, 0, 0x0FFFFF, 0x92, 0x08); // Kernel Data Descriptor
+	setupGDTEntry(1, 0, 0x0FFFFF, 0x9A, 0x02); // Kernel Code
+	setupGDTEntry(2, 0, 0x0FFFFF, 0x92, 0x00); // Kernel Data
+	setupGDTEntry(3, 0, 0x0FFFFF, 0xFA, 0x02); // User Code
+	setupGDTEntry(4, 0, 0x0FFFFF, 0xF2, 0x00); // User Data
 
 	gdtPtr.limit = sizeof(gdtEntries) - 1;
 	gdtPtr.base  = (uint64_t)&gdtEntries;

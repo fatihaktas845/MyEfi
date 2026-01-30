@@ -23,9 +23,11 @@ $(shell mkdir -p boot/obj)
 all: $(ISO_TARGET)
 	qemu-system-x86_64 -bios boot/OVMF.fd \
 		-drive if=virtio,format=raw,file=$(ISO_TARGET) \
+		-machine q35 \
 		-net none \
 		-m 512M \
 		-vnc :0 \
+		-d int,cpu_reset \
 		-serial stdio
 
 $(ISO_TARGET): $(BOOT_TARGET) $(KERNEL_TARGET)
