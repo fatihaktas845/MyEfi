@@ -9,7 +9,7 @@ uint8_t *heap;
 void initPageAllocator() {
 	heap = &__kernel_heap_start;
 	
-    size_t pageCount = 4 * 1024 * 1024 / 4096;
+    size_t pageCount = (4 * 1024 * 1024) / 4096;
 
 	for (size_t i = 0; i < pageCount; i++) {
 		block_t *page = (block_t *)(heap + i * 4096);

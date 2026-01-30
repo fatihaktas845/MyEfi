@@ -23,15 +23,17 @@ char* hex64_to_str(uint64_t hex) {
 
 void *bootInfo;
 
+extern uint8_t __kernel_heap_start;
+
 void kmain() {
 	BootInfo *bi = (BootInfo *)bootInfo;
 	
-	// initPageAllocator();
-	// KernelGOPInfo *kgi = (KernelGOPInfo *)allocPage();
-	// memcpy(kgi, bi->kgi, 4096);
+	initPageAllocator();
+	KernelGOPInfo *kgi = (KernelGOPInfo *)allocPage();
+	memcpy(kgi, bi->kgi, 4096);
 
-	volatile uint32_t *fbb = (uint32_t*)bi->kgi->FrameBufferBase;
-	uint32_t pps = bi->kgi->PixelsPerScanLine;
+	volatile uint32_t *fbb = (uint32_t*)kgi->FrameBufferBase;
+	uint32_t pps = kgi->PixelsPerScanLine;
 
 	initPSFv1(fbb, pps);
 	printk("Welcome To Veyra!\n", 0x00FFFFFF);
@@ -45,7 +47,7 @@ void kmain() {
 	printk(str, 0x0000FF00);
 	printk("\n", 0x00FF0000);
 
-	printk(hex64_to_str(bi->kgi->FrameBufferBase), 0x00FFFF00);
+	printk(hex64_to_str((uint64_t)&__kernel_heap_start), 0x00FFFF00);
 	/* while (*str) {
 		outb(0x3F8, *str);
 		str++;

@@ -72,7 +72,7 @@ void setup_high_half_map(EFI_BOOT_SERVICES *bs) {
 	uint64_t kernel_phys = 0x200000ULL;
 	uint64_t kernel_virt = 0xFFFFFFFF80000000ULL;
 
-	for (uint64_t offset = 0; offset < 4ULL * 0x100000ULL; offset += 0x200000ULL) {
+	for (uint64_t offset = 0; offset < 20ULL * 0x100000ULL; offset += 0x200000ULL) {
 		map_address(bs, kernel_phys + offset, kernel_virt + offset);
 	}
 }
