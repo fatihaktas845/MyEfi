@@ -3,6 +3,12 @@
 
 #include <stdint.h>
 
+#define PT_LOAD 1
+
+#define PF_X	0x1
+#define PF_W	0x2
+#define PF_R	0x4
+
 typedef struct {
 	unsigned char	e_ident[16];
 	uint16_t		e_type;

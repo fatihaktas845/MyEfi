@@ -1,10 +1,6 @@
 #include "elf.h"
 #include "paging.h"
 
-#define PF_X	0x1
-#define PF_W	0x2
-#define PF_R	0x4
-
 void *memcpy(void *dest, void *src, uint64_t n) {
 	uint8_t *d = (uint8_t*)dest;
 	uint8_t *s = (uint8_t*)src;
@@ -123,6 +119,8 @@ EFI_STATUS EFIAPI efiMain(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *ST) {
 	EFI_PHYSICAL_ADDRESS virt = 0xFFFFFFFF80000000ULL;
 
 	for (uint32_t i = 0; i < ehdr->e_phnum; i++) {
+		if (phdr_table[i].p_type != PT_LOAD) continue;
+
 		UINTN memsize = phdr_table[i].p_memsz;
 		UINTN filesize = phdr_table[i].p_filesz;
 		EFI_PHYSICAL_ADDRESS load_addr;

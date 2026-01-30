@@ -38,15 +38,6 @@ void kmain() {
 	initPSFv1(fbb, pps);
 	printk("Welcome To Veyra!\n", 0x00FFFFFF);
 
-	uint64_t rip;
-	asm volatile("leaq (%%rip), %0" : "=r"(rip));
-
-	char *str = hex64_to_str(rip);
-
-	printk("RIP: ", 0x0000FF00);
-	printk(str, 0x0000FF00);
-	printk("\n", 0x00FF0000);
-
 	printk(hex64_to_str((uint64_t)&__kernel_heap_start), 0x00FFFF00);
 	/* while (*str) {
 		outb(0x3F8, *str);
