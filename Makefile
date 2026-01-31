@@ -53,7 +53,7 @@ $(BOOT_TARGET): $(BOOT_OBJ)
 boot/obj/%.o: boot/src/%.c
 	$(CC) -target x86_64-unknown-windows \
 		-fshort-wchar \
-		-I ../gnu-efi/inc -I boot/include \
+		-I boot/include \
 		-c $< -o $@
 
 $(KERNEL_TARGET): $(KERNEL_OBJ) $(ASM_OBJ)

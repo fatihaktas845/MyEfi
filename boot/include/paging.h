@@ -1,7 +1,7 @@
 #ifndef __PAGING_H__
 #define __PAGING_H__
 
-#include <efi.h>
+#include "efi.h"
 
 void *allocate_page(EFI_BOOT_SERVICES *bs);
 void init_pml4(EFI_BOOT_SERVICES *bs);

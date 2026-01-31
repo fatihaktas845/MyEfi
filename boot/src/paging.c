@@ -1,4 +1,5 @@
 #include "paging.h"
+#include "stdint.h"
 
 #define PAGE_PRESENT (1ULL << 0)
 #define PAGE_RW      (1ULL << 1)
